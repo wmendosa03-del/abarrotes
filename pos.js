@@ -580,15 +580,14 @@
 		if (!Number.isFinite(received)) received = 0;
 		if (!state.cart.size) {
 			received = 0;
-			if (cashInput && document.activeElement !== cashInput) {
-				cashInput.value = '';
-			}
+			if (cashInput) cashInput.value = '';
 		} else if (state.payment !== 'Efectivo') {
 			received = total;
 			if (cashInput) cashInput.value = total > 0 ? total.toFixed(2) : '';
+		} else if (cashInput && cashInput.value === '') {
+			received = total;
+			cashInput.value = total > 0 ? total.toFixed(2) : '';
 		}
-		// Para pago en efectivo: usar lo que el usuario escribiÃ³ (o 0 si vacÃ­o)
-		// No auto-llenar con el total; el usuario ingresa su monto libremente
 		const change = round2(received - total);
 		if (changeBox) changeBox.classList.toggle('negative', change < -0.001);
 		if (changeLabel) changeLabel.textContent = change < 0 ? `- ${money(Math.abs(change))}` : money(change);
@@ -772,6 +771,7 @@
 		window.__debugSave = { editing, isEditing, title: $('quickClientModalTitle')?.textContent, quickClientId: $('quickClientId').value, windowEditing: window.__editingClientId };
 		notify(isEditing ? 'Cliente actualizado.' : `Cliente ${name} registrado.`);
 		window.__editingClientId = null;
+		const modal = $('quickClientModal');
 		if (modal) delete modal.dataset.editingId;
 		closeQuickClient();
 		state.customersLoaded = false;
@@ -1886,22 +1886,7 @@
 			const discount = round2(Math.max(0, Math.min(Number(input.value || 0), subtotal)));
 			input.value = discount > 0 ? discount.toFixed(2) : '';
 		});
-		$('posCashReceived')?.addEventListener('input', () => {
-		const cashInput = $('posCashReceived');
-		const changeLabel = $('posChange');
-		const changeBox = $('posChangeBox');
-		const chargeButton = $('posChargeButton');
-		if (!cashInput) return;
-		const received = Number(String(cashInput.value || '0').replace(',', '.'));
-		const total = state.total || 0;
-		const change = round2((Number.isFinite(received) ? received : 0) - total);
-		if (changeBox) changeBox.classList.toggle('negative', change < -0.001);
-		if (changeLabel) changeLabel.textContent = change < 0 ? `- ${money(Math.abs(change))}` : money(change);
-		if (chargeButton) {
-			const insufficientCash = state.payment === 'Efectivo' && (Number.isFinite(received) ? received : 0) < total - 0.001;
-			chargeButton.disabled = state.busy || state.cart.size === 0 || insufficientCash;
-		}
-	});
+		$('posCashReceived')?.addEventListener('input', updateTotals);
 		$('posCashReceived')?.addEventListener('focus', () => { $('posCashReceived')?.select(); });
 		$('posCashReceived')?.addEventListener('click', () => { $('posCashReceived')?.select(); });
 	$('posCashReceived')?.addEventListener('blur', () => {
@@ -3765,6 +3750,63 @@
 		$('userName').focus();
 	}
 
+	/* â”€â”€ Registro rÃ¡pido de cliente â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+	function openQuickClient() {
+		const modal = $('quickClientModal');
+		if (modal) modal.hidden = false;
+		$('quickClientName')?.focus();
+	}
+	function closeQuickClient() {
+		const modal = $('quickClientModal');
+		if (modal) modal.hidden = true;
+		['quickClientName', 'quickClientRtn', 'quickClientPhone', 'quickClientEmail', 'quickClientIdentity', 'quickClientAddress'].forEach(id => {
+			const field = $(id);
+			if (field) field.value = '';
+		});
+	}
+	async function saveQuickClient() {
+		const form = $('quickClientForm');
+		if (!form || !form.reportValidity()) return;
+		const name = String($('quickClientName').value || '').trim();
+		const rtn = normalizeRtn($('quickClientRtn').value);
+		if (!name) {
+			notify('Escribe el nombre o la razÃ³n social del cliente.', 'error');
+			$('quickClientName').focus();
+			return;
+		}
+		if (rtn && rtn.length !== 14) {
+			notify('El RTN debe tener exactamente 14 dÃ­gitos.', 'error');
+			$('quickClientRtn').focus();
+			return;
+		}
+		const database = await ensureWritable();
+		if (!database) return;
+		const { data, error } = await database.rpc('crear_cliente', {
+			p_nombre: name,
+			p_telefono: String($('quickClientPhone').value || '').trim(),
+			p_correo: String($('quickClientEmail').value || '').trim(),
+			p_identidad: String($('quickClientIdentity').value || '').trim(),
+			p_direccion: String($('quickClientAddress').value || '').trim(),
+			p_rtn: rtn
+		});
+		if (error) {
+			const message = String(error.message || '').toLowerCase();
+			if (message.includes('could not find the function') || message.includes('schema cache') || isMissingModule(error)) {
+				showSetupBanner();
+				notify('Ejecuta la versiÃ³n actualizada de "data base pos.sql" para registrar clientes con RTN.', 'error');
+			} else {
+				notify(error.message || 'No se pudo registrar el cliente.', 'error');
+			}
+			return;
+		}
+		notify(`Cliente ${name} registrado.`);
+		closeQuickClient();
+		state.customersLoaded = false;
+		await loadCustomers(true);
+		const select = $('posCustomer');
+		if (select && data?.id) select.value = String(data.id);
+		updateCustomerTax();
+	}
 
 	/* â”€â”€ API pÃºblica para Recibo.html â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 	window.WSApp.renderPOS = renderPOS;
@@ -3791,7 +3833,199 @@
 	window.WSApp.renderUsersView = renderUsersView;
 	window.WSApp.refreshUsers = refreshUsers;
 
-	function init() {
+	
+
+/* â”€â”€ Formulario de ConfiguraciÃ³n Unificado: Empresa + CAI â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+class ConfigForm {
+    constructor() {
+        this.modal = $('configModal');
+        this.form = $('configForm');
+        this.init();
+    }
+    init() {
+        if (!this.modal || !this.form) return;
+        this.form.addEventListener('submit', e => this.handleSave(e));
+        const updateBtn = $('configUpdateBtn');
+        if (updateBtn) updateBtn.addEventListener('click', () => this.loadConfig());
+        const resetBtn = $('configResetBtn');
+        if (resetBtn) resetBtn.addEventListener('click', () => this.resetDefaults());
+        const cancelBtn = $('configCancelBtn');
+        if (cancelBtn) cancelBtn.addEventListener('click', () => this.close());
+        const closeBtn = this.modal.querySelector('.modal-close');
+        if (closeBtn) closeBtn.addEventListener('click', () => this.close());
+    }
+    open() {
+        this.loadConfig();
+        this.modal.hidden = false;
+        this.form.querySelector('input, select')?.focus();
+    }
+    async loadConfig() {
+        // 1. Cargar settings de localStorage (empresa, facturaciÃ³n)
+        const settings = loadSettings();
+        this.populate(settings);
+        // 2. Cargar CAI desde Supabase
+        await this.loadCai();
+        notify('ConfiguraciÃ³n cargada.');
+    }
+    async loadCai() {
+        const database = getDb();
+        if (!database) return;
+        try {
+            const { data, error } = await database
+                .from('configuracion_cai')
+                .select('*')
+                .eq('activo', true)
+                .order('creado_en', { ascending: false })
+                .limit(1);
+            if (!error && data && data.length > 0) {
+                const cai = data[0];
+                this.populate({
+                    cai: cai.cai,
+                    caiRtn: cai.rtn_emisor,
+                    caiTipo: cai.tipo_documento || '01',
+                    caiEstablecimiento: cai.establecimiento || '001',
+                    caiPunto: cai.punto_emision || '001',
+                    caiDesde: cai.correlativo_inicio || 1,
+                    caiHasta: cai.correlativo_fin || 8000,
+                    caiFechaLimite: cai.fecha_limite ? cai.fecha_limite.split('T')[0] : '',
+                    caiActivo: String(cai.activo),
+                    caiNegocio: cai.nombre_negocio || '',
+                    caiDireccion: cai.direccion || '',
+                    caiTelefono: cai.telefono || '',
+                    caiPie: cai.pie_factura || ''
+                });
+            }
+        } catch (err) {
+            console.warn('No se pudo cargar CAI:', err);
+        }
+    }
+    populate(data) {
+        if (!this.form) return;
+        Object.keys(data).forEach(key => {
+            const input = this.form.querySelector('[name="' + key + '"]');
+            if (input) {
+                if (input.type === 'checkbox') { input.checked = !!data[key]; }
+                else { input.value = data[key] ?? ''; }
+            }
+        });
+    }
+    collect() {
+        if (!this.form) return null;
+        const formData = new FormData(this.form);
+        const data = {};
+        formData.forEach((value, key) => {
+            const input = this.form.querySelector('[name="' + key + '"]');
+            if (input?.type === 'checkbox') { data[key] = input.checked; }
+            else if (input?.type === 'number') { data[key] = value === '' ? null : Number(value); }
+            else { data[key] = value; }
+        });
+        return data;
+    }
+    validate() {
+        if (!this.form) return false;
+        return this.form.reportValidity();
+    }
+    async handleSave(e) {
+        e.preventDefault();
+        if (!this.validate()) return;
+
+        const data = this.collect();
+        const submitBtn = $('configSaveBtn');
+        if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Guardando...'; }
+
+        try {
+            // 1. Separar datos de empresa/facturaciÃ³n (localStorage) y CAI (Supabase)
+            const settingsKeys = ['negocio', 'rtn', 'telefono', 'direccion', 'correo', 'pie', 'isv', 'stockMinimo', 'moneda'];
+            const caiKeys = ['cai', 'caiRtn', 'caiTipo', 'caiEstablecimiento', 'caiPunto', 'caiDesde', 'caiHasta', 'caiFechaLimite', 'caiActivo', 'caiNegocio', 'caiDireccion', 'caiTelefono', 'caiPie'];
+
+            const settingsData = {};
+            settingsKeys.forEach(k => { if (data[k] !== undefined) settingsData[k] = data[k]; });
+
+            const caiData = {};
+            caiKeys.forEach(k => { if (data[k] !== undefined) caiData[k] = data[k]; });
+
+            // 2. Guardar settings en localStorage
+            persistSettings(settingsData);
+            state.settings = { ...DEFAULT_SETTINGS, ...settingsData };
+
+            // 3. Guardar CAI en Supabase
+            await this.saveCai(caiData);
+
+            notify('ConfiguraciÃ³n guardada correctamente.');
+            this.close();
+        } catch (error) {
+            notify(error.message || 'Error al guardar.', 'error');
+        } finally {
+            if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Guardar todo'; }
+        }
+    }
+    async saveCai(caiData) {
+        const database = await ensureWritable();
+        if (!database) return;
+
+        // Mapear campos del formulario a la tabla configuracion_cai
+        const payload = {
+            p_cai: caiData.cai || '',
+            p_rtn_emisor: caiData.caiRtn || '',
+            p_tipo_documento: caiData.caiTipo || '01',
+            p_establecimiento: caiData.caiEstablecimiento || '001',
+            p_punto_emision: caiData.caiPunto || '001',
+            p_correlativo_inicio: Number(caiData.caiDesde) || 1,
+            p_correlativo_fin: Number(caiData.caiHasta) || 8000,
+            p_fecha_limite: caiData.caiFechaLimite ? new Date(caiData.caiFechaLimite + 'T00:00:00').toISOString() : null,
+            p_activo: caiData.caiActivo === 'true',
+            p_nombre_negocio: caiData.caiNegocio || '',
+            p_direccion: caiData.caiDireccion || '',
+            p_telefono: caiData.caiTelefono || '',
+            p_pie_factura: caiData.caiPie || ''
+        };
+
+        // Usar RPC para crear/actualizar CAI
+        const { error } = await database.rpc('crear_o_actualizar_cai', payload);
+        if (error) {
+            // Si no existe la RPC, intentar insert directo
+            if (error.message?.includes('function') || error.message?.includes('RPC')) {
+                // Desactivar otros CAI activos
+                await database.from('configuracion_cai').update({ activo: false }).eq('activo', true);
+                // Insertar nuevo
+                const { error: insError } = await database.from('configuracion_cai').insert({
+                    cai: payload.p_cai,
+                    rtn_emisor: payload.p_rtn_emisor,
+                    tipo_documento: payload.p_tipo_documento,
+                    establecimiento: payload.p_establecimiento,
+                    punto_emision: payload.p_punto_emision,
+                    correlativo_inicio: payload.p_correlativo_inicio,
+                    correlativo_fin: payload.p_correlativo_fin,
+                    correlativo_actual: payload.p_correlativo_inicio - 1,
+                    fecha_limite: payload.p_fecha_limite,
+                    activo: payload.p_activo,
+                    nombre_negocio: payload.p_nombre_negocio,
+                    direccion: payload.p_direccion,
+                    telefono: payload.p_telefono,
+                    pie_factura: payload.p_pie_factura
+                });
+                if (insError) throw insError;
+            } else {
+                throw error;
+            }
+        }
+        // Recargar CAI activo
+        await loadActiveCai();
+    }
+    resetDefaults() {
+        if (!confirm('Â¿Restaurar valores por defecto? Se perderÃ¡n los cambios actuales.')) return;
+        this.populate(DEFAULT_SETTINGS);
+        notify('Valores por defecto cargados. Presiona "Guardar todo" para confirmar.');
+    }
+    close() {
+        this.modal.hidden = true;
+    }
+}
+const configForm = new ConfigForm();
+window.WSApp.openConfigForm = () => configForm.open();
+window.WSApp.configForm = configForm;
+
+function init() {
 		if (!$('posView')) return;
 		initSalesDates();
 		initReportsDates();

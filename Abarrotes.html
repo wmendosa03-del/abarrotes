@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
 	<meta charset="UTF-8">
@@ -9,7 +9,7 @@
 	<link rel="manifest" href="./manifest-abarrotes.webmanifest">
 	<link rel="icon" href="./icon.svg" type="image/svg+xml">
 	<link rel="apple-touch-icon" href="./icon.svg">
-	<title>WS Abarrotes · Punto de venta</title>
+	<title>WS Abarrotes Â· Punto de venta</title>
 	<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 	<script src="./supabase-config.js"></script>
 	<link rel="stylesheet" href="./abarrotes-base.css">
@@ -21,15 +21,15 @@
 		<h1 id="authTitle">WS Abarrotes</h1>
 		<p id="authDescription">Sistema de punto de venta para abarrotes.</p>
 		<div class="auth-modes" role="group" aria-label="Modo de acceso">
-			<button id="loginModeButton" type="button" aria-pressed="true">Ingresar</button>
-			<button id="signupModeButton" type="button" aria-pressed="false">Crear cuenta</button>
+			<button id="loginModeButton" type="button" aria-pressed="true">Iniciar sesión</button>
+			<button id="signupModeButton" type="button" aria-pressed="false">Registrarse</button>
 		</div>
 		<form id="loginForm">
-			<label class="field-label" for="loginUsername">Usuario</label>
+			<label class="field-label" for="loginUsername">Nombre de usuario</label>
 			<input id="loginUsername" type="text" autocomplete="username" placeholder="usuario" minlength="2" maxlength="31" pattern="[A-Za-z0-9][A-Za-z0-9._\-]{1,30}" required>
 			<label class="field-label" for="loginPassword">Contraseña</label>
 			<input id="loginPassword" type="password" autocomplete="current-password" required>
-			<button class="button primary" id="loginButton" type="submit" style="width:100%;min-height:38px;margin-top:4px;">Ingresar</button>
+			<button class="button primary" id="loginButton" type="submit" style="width:100%;min-height:38px;margin-top:4px;">Iniciar sesión</button>
 		</form>
 		<p class="auth-status" id="authStatus" role="status" aria-live="polite"></p>
 	</section>
@@ -367,7 +367,7 @@
 			<div class="pos-setup-banner" id="posSetupBanner" hidden>
 				<div>
 					<strong>Falta activar el punto de venta</strong>
-					Ejecuta el archivo <code>data base pos.sql</code> en Supabase → SQL Editor y luego recarga esta página.
+					Ejecuta el archivo <code>data base pos.sql</code> en Supabase â†’ SQL Editor y luego recarga esta página.
 				</div>
 			</div>
 
@@ -462,7 +462,7 @@
 							<div class="pos-bank-row" id="posBankRow" hidden>
 								<label for="posCardBank">Banco / terminal POS
 									<select id="posCardBank">
-										<option value="">Selecciona el banco…</option>
+										<option value="">Selecciona el bancoâ€¦</option>
 										<option value="BAC Credomatic">BAC Credomatic</option>
 										<option value="Banco Atlántida">Banco Atlántida</option>
 										<option value="Banco Nacional de Honduras">Banco Nacional de Honduras</option>
@@ -488,7 +488,7 @@
 							<input id="posNote" type="text" maxlength="300" placeholder="Opcional">
 						</div>
 						<button class="button primary pos-charge-button" id="posChargeButton" type="button" disabled>Cobrar venta</button>
-						<p class="pos-hint">F2 buscar · F4 cobrar · Enter agrega el código escaneado</p>
+						<p class="pos-hint">F2 buscar Â· F4 cobrar Â· Enter agrega el código escaneado</p>
 					</aside>
 				</div>
 			</section>
@@ -644,7 +644,7 @@
 				<div class="dashboard-tax" id="dashboardTax"></div>
 				<div class="dashboard-columns">
 					<section class="card">
-						<h3>Últimas ventas</h3>
+						<h3>íšltimas ventas</h3>
 						<div class="data-list dashboard-list" id="dashboardRecentSales" aria-live="polite"></div>
 					</section>
 					<section class="card">
@@ -838,7 +838,7 @@
 						</form>
 					</section>
 					<section class="card">
-						<h3>CAI · Código de Autorización de Impresión (SAR)</h3>
+						<h3>CAI Â· Código de Autorización de Impresión (SAR)</h3>
 						<form id="caiForm">
 							<input id="caiId" type="hidden">
 							<div class="form-grid product-form-grid">
@@ -853,8 +853,8 @@
 								<div class="field">
 									<label for="caiTipo">Tipo de documento</label>
 									<select id="caiTipo">
-										<option value="01">01 · Factura Comercial</option>
-										<option value="02">02 · Recibo</option>
+										<option value="01">01 Â· Factura Comercial</option>
+										<option value="02">02 Â· Recibo</option>
 									</select>
 								</div>
 								<div class="field">
@@ -898,7 +898,7 @@
 								</div>
 								<div class="field full">
 									<label for="caiPie">Pie de factura</label>
-									<input id="caiPie" maxlength="180" value="¡Gracias por su compra!">
+									<input id="caiPie" maxlength="180" value="Â¡Gracias por su compra!">
 								</div>
 							</div>
 							<div class="form-actions">
@@ -917,7 +917,7 @@
 						</div>
 						<div class="settings-preview">
 							<span>Factura</span>
-							<strong>RTN negocio · RTN cliente · Base · ISV 15% · Total</strong>
+							<strong>RTN negocio Â· RTN cliente Â· Base Â· ISV 15% Â· Total</strong>
 						</div>
 					</section>
 				</div>
@@ -1116,7 +1116,7 @@
 		<div class="pos-modal-card">
 			<div class="pos-modal-head">
 				<h3 id="ticketModalTitle">Factura de venta</h3>
-				<button class="modal-close" id="closeTicketModal" type="button" aria-label="Cerrar">×</button>
+				<button class="modal-close" id="closeTicketModal" type="button" aria-label="Cerrar">í—</button>
 			</div>
 			<div class="pos-modal-body" id="ticketContent"></div>
 			<div class="pos-modal-actions">
@@ -1130,7 +1130,7 @@
 		<div class="pos-modal-card">
 			<div class="pos-modal-head">
 				<h3 id="quickClientModalTitle">Registrar cliente</h3>
-				<button class="modal-close" id="closeQuickClientModal" type="button" aria-label="Cerrar">×</button>
+				<button class="modal-close" id="closeQuickClientModal" type="button" aria-label="Cerrar">í—</button>
 			</div>
 			<div class="pos-modal-body">
 				<form id="quickClientForm">
@@ -1171,7 +1171,137 @@
 		</div>
 	</div>
 
-	<div class="toast" id="toast" role="status" aria-live="polite"></div>
+	
+<!-- Modal Configuración Unificada: Empresa + CAI -->
+	<div class="pos-modal-card" id="configModal" hidden role="dialog" aria-modal="true" aria-labelledby="configModalTitle">
+		<div class="pos-modal-head">
+			<h3 id="configModalTitle">Configuración de la Empresa y CAI</h3>
+			<button class="modal-close" type="button" aria-label="Cerrar">í—</button>
+		</div>
+		<div class="pos-modal-body">
+			<form id="configForm">
+				<div class="form-grid product-form-grid">
+					<!-- Datos de la Empresa -->
+					<div class="field full" style="grid-column: 1 / -1;">
+						<h4 style="margin: 8px 0; color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 4px;">Datos de la Empresa</h4>
+					</div>
+					<div class="field full">
+						<label for="configNegocio">Nombre del negocio *</label>
+						<input id="configNegocio" name="negocio" maxlength="120" required>
+					</div>
+					<div class="field">
+						<label for="configRtn">RTN del negocio (14 dígitos)</label>
+						<input id="configRtn" name="rtn" inputmode="numeric" maxlength="14" placeholder="14 dígitos" pattern="[0-9]{14}">
+					</div>
+					<div class="field">
+						<label for="configTelefono">Teléfono</label>
+						<input id="configTelefono" name="telefono" maxlength="30">
+					</div>
+					<div class="field full">
+						<label for="configDireccion">Dirección fiscal</label>
+						<input id="configDireccion" name="direccion" maxlength="240">
+					</div>
+					<div class="field full">
+						<label for="configCorreo">Correo electrónico</label>
+						<input id="configCorreo" name="correo" type="email" maxlength="120">
+					</div>
+					<!-- Configuración de Facturación -->
+					<div class="field full" style="grid-column: 1 / -1;">
+						<h4 style="margin: 16px 0 8px; color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 4px;">Configuración de Facturación</h4>
+					</div>
+					<div class="field full">
+						<label for="configPie">Mensaje al pie de la factura</label>
+						<input id="configPie" name="pie" maxlength="180">
+					</div>
+					<div class="field">
+						<label for="configIsv">ISV predeterminado (%)</label>
+						<input id="configIsv" name="isv" type="number" min="0" max="100" step="0.01" value="15">
+					</div>
+					<div class="field">
+						<label for="configStockMin">Stock mínimo predeterminado</label>
+						<input id="configStockMin" name="stockMinimo" type="number" min="0" step="0.001" value="5">
+					</div>
+					<div class="field">
+						<label for="configMoneda">Símbolo de moneda</label>
+						<input id="configMoneda" name="moneda" maxlength="8" value="L.">
+					</div>
+					<!-- CAI - Código de Autorización de Impresión -->
+					<div class="field full" style="grid-column: 1 / -1;">
+						<h4 style="margin: 16px 0 8px; color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 4px;">CAI — Código de Autorización de Impresión (SAR)</h4>
+					</div>
+					<div class="field full">
+						<label for="configCai">CAI *</label>
+						<input id="configCai" name="cai" maxlength="40" placeholder="XXXXXX-XXXX-XXXX-XXXX-XXXX-XXXX" required>
+					</div>
+					<div class="field">
+						<label for="configCaiRtn">RTN del emisor *</label>
+						<input id="configCaiRtn" name="caiRtn" inputmode="numeric" maxlength="14" placeholder="14 dígitos" pattern="[0-9]{14}" required>
+					</div>
+					<div class="field">
+						<label for="configCaiTipo">Tipo de documento *</label>
+						<select id="configCaiTipo" name="caiTipo" required>
+							<option value="01">01 — Factura Comercial</option>
+							<option value="02">02 — Recibo</option>
+						</select>
+					</div>
+					<div class="field">
+						<label for="configCaiEstablecimiento">Establecimiento</label>
+						<input id="configCaiEstablecimiento" name="caiEstablecimiento" maxlength="3" value="001">
+					</div>
+					<div class="field">
+						<label for="configCaiPunto">Punto de emisión</label>
+						<input id="configCaiPunto" name="caiPunto" maxlength="3" value="001">
+					</div>
+					<div class="field">
+						<label for="configCaiDesde">Correlativo desde</label>
+						<input id="configCaiDesde" name="caiDesde" type="number" min="1" step="1" value="1" required>
+					</div>
+					<div class="field">
+						<label for="configCaiHasta">Correlativo hasta</label>
+						<input id="configCaiHasta" name="caiHasta" type="number" min="1" step="1" value="8000" required>
+					</div>
+					<div class="field">
+						<label for="configCaiFechaLimite">Fecha límite de emisión *</label>
+						<input id="configCaiFechaLimite" name="caiFechaLimite" type="date" required>
+					</div>
+					<div class="field">
+						<label for="configCaiActivo">Estado</label>
+						<select id="configCaiActivo" name="caiActivo">
+							<option value="true">Activo</option>
+							<option value="false">Inactivo</option>
+						</select>
+					</div>
+					<!-- Datos en el ticket (opcional, sobrescribe empresa) -->
+					<div class="field full" style="grid-column: 1 / -1;">
+						<h4 style="margin: 16px 0 8px; color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 4px;">Datos en el ticket (opcional, sobrescribe empresa)</h4>
+					</div>
+					<div class="field full">
+						<label for="configCaiNegocio">Nombre en ticket</label>
+						<input id="configCaiNegocio" name="caiNegocio" maxlength="120" placeholder="Igual al nombre de la empresa">
+					</div>
+					<div class="field full">
+						<label for="configCaiDireccion">Dirección en ticket</label>
+						<input id="configCaiDireccion" name="caiDireccion" maxlength="240" placeholder="Igual a la dirección fiscal">
+					</div>
+					<div class="field">
+						<label for="configCaiTelefono">Teléfono en ticket</label>
+						<input id="configCaiTelefono" name="caiTelefono" maxlength="30" placeholder="Igual al teléfono de la empresa">
+					</div>
+					<div class="field full">
+						<label for="configCaiPie">Pie de factura en ticket</label>
+						<input id="configCaiPie" name="caiPie" maxlength="180" placeholder="Igual al pie de factura">
+					</div>
+				</div>
+				<div class="form-actions">
+					<button class="button primary grow" type="submit" id="configSaveBtn">Guardar todo</button>
+					<button class="button" type="button" id="configUpdateBtn">Actualizar</button>
+					<button class="button" type="button" id="configResetBtn">Restaurar defectos</button>
+					<button class="button" type="button" id="configCancelBtn">Cancelar</button>
+				</div>
+			</form>
+		</div>
+	</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 	<script>
 		(() => {
@@ -1413,8 +1543,8 @@
 					loginButton.textContent = registering ? 'Crear cuenta' : 'Ingresar';
 					loginPasswordInput.autocomplete = registering ? 'new-password' : 'current-password';
 					authDescription.textContent = registering
-						? 'Crea tu usuario y contraseña. El administrador debe autorizarlo primero.'
-						: 'Ingresa con tu nombre de usuario y contraseña.';
+						? 'Crea tu usuario y Contraseña. El administrador debe autorizarlo primero.'
+						: 'Ingresa con tu nombre de usuario y Contraseña.';
 					authStatus.textContent = '';
 				}
 
@@ -1424,7 +1554,7 @@
 					event.preventDefault();
 					if (!loginForm.reportValidity()) return;
 					loginButton.disabled = true;
-					authStatus.textContent = authMode === 'signup' ? 'Creando cuenta…' : 'Validando acceso…';
+					authStatus.textContent = authMode === 'signup' ? 'Creando cuentaâ€¦' : 'Validando accesoâ€¦';
 					const email = authEmailFromUsername(loginUsernameInput.value);
 					if (!email) {
 						loginButton.disabled = false;
@@ -1442,9 +1572,9 @@
 						if (authMode === 'signup' && message.includes('already registered')) {
 							authStatus.textContent = 'Este usuario ya tiene cuenta. Selecciona Ingresar.';
 						} else if (authMode === 'signup') {
-							authStatus.textContent = 'No se pudo crear la cuenta. Revisa el usuario y la contraseña.';
+							authStatus.textContent = 'No se pudo crear la cuenta. Revisa el usuario y la Contraseña.';
 						} else {
-							authStatus.textContent = 'Usuario o contraseña incorrectos.';
+							authStatus.textContent = 'Usuario o Contraseña incorrectos.';
 						}
 						return;
 					}
