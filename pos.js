@@ -1,5 +1,5 @@
-/* ============================================================
-   WS Services · Módulo de Punto de Venta
+﻿/* ============================================================
+   WS Services Â· MÃ³dulo de Punto de Venta
    Requiere que Recibo.html exponga window.WSApp.
    ============================================================ */
 'use strict';
@@ -18,7 +18,7 @@
 		direccion: '',
 		telefono: '',
 		correo: '',
-		pie: '¡Gracias por su compra!',
+		pie: 'Â¡Gracias por su compra!',
 		isv: DEFAULT_TAX,
 		stockMinimo: 5,
 		moneda: 'L.'
@@ -122,9 +122,9 @@
 		const centenas = ['','ciento','doscientos','trescientos','cuatrocientos','quinientos','seiscientos','setecientos','ochocientos','novecientos'];
 		const especiales = {
 			11: 'once', 12: 'doce', 13: 'trece', 14: 'catorce', 15: 'quince',
-			16: 'dieciséis', 17: 'diecisiete', 18: 'dieciocho', 19: 'diecinueve',
-			21: 'veintiuno', 22: 'veintidós', 23: 'veintitrés', 24: 'veinticuatro',
-			25: 'veinticinco', 26: 'veintiséis', 27: 'veintisiete', 28: 'veintiocho',
+			16: 'diecisÃ©is', 17: 'diecisiete', 18: 'dieciocho', 19: 'diecinueve',
+			21: 'veintiuno', 22: 'veintidÃ³s', 23: 'veintitrÃ©s', 24: 'veinticuatro',
+			25: 'veinticinco', 26: 'veintisÃ©is', 27: 'veintisiete', 28: 'veintiocho',
 			29: 'veintinueve'
 		};
 		function convert(n) {
@@ -152,7 +152,7 @@
 			}
 			const millones = Math.floor(n / 1000000);
 			const r = n % 1000000;
-			return (millones === 1 ? 'un millón' : convert(millones) + ' millones') + (r ? ' ' + convert(r) : '');
+			return (millones === 1 ? 'un millÃ³n' : convert(millones) + ' millones') + (r ? ' ' + convert(r) : '');
 		}
 		const words = convert(integer);
 		return words.charAt(0).toUpperCase() + words.slice(1) + ' Lempiras';
@@ -167,7 +167,7 @@
 		return documentTypeOf(sale) === 'Recibo' ? 'Recibo' : 'Factura';
 	}
 
-	/* ── Utilidades ─────────────────────────────────────────── */
+	/* â”€â”€ Utilidades â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 	function notify(message, variant) {
 		if (typeof ws().notify === 'function') ws().notify(message, variant);
 	}
@@ -206,8 +206,8 @@
 			supervisor: 'Supervisor',
 			caja: 'Caja',
 			vendedor: 'Vendedor',
-			reception: 'Recepción',
-			technician: 'Técnico',
+			reception: 'RecepciÃ³n',
+			technician: 'TÃ©cnico',
 			viewer: 'Solo consulta'
 		};
 		return labels[role] || role;
@@ -215,7 +215,7 @@
 	function getDb() {
 		const database = ws().database;
 		if (!database) {
-			notify('La conexión con la base de datos todavía no está lista.', 'error');
+			notify('La conexiÃ³n con la base de datos todavÃ­a no estÃ¡ lista.', 'error');
 			return null;
 		}
 		return database;
@@ -332,7 +332,7 @@
 		};
 	}
 
-	/* ── Productos ──────────────────────────────────────────── */
+	/* â”€â”€ Productos â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 	async function loadProducts(force = false) {
 		if (state.loadingProducts) return state.products;
 		if (state.productsLoaded && !force) return state.products;
@@ -350,7 +350,7 @@
 					state.categories = [];
 					return state.products;
 				}
-				notify(error.message || 'No se pudo consultar el catálogo.', 'error');
+				notify(error.message || 'No se pudo consultar el catÃ¡logo.', 'error');
 				return state.products;
 			}
 			state.products = (data || []).map(normalizeProduct);
@@ -418,7 +418,7 @@
 			grid.innerHTML = `
 				<div class="pos-empty">
 					<div class="empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 7h16l-1.5 13H5.5z"/><path d="M8 7V5a4 4 0 0 1 8 0v2"/></svg></div>
-					<p>${state.setupMissing ? 'El módulo de productos todavía no está activo.' : 'No hay productos que coincidan con la búsqueda.'}</p>
+					<p>${state.setupMissing ? 'El mÃ³dulo de productos todavÃ­a no estÃ¡ activo.' : 'No hay productos que coincidan con la bÃºsqueda.'}</p>
 					<button class="button primary" type="button" data-pos-action="new-product">Agregar producto</button>
 				</div>`;
 			return;
@@ -430,7 +430,7 @@
 				<button class="pos-product-card${empty ? ' out-of-stock' : ''}" type="button" data-pos-product="${product.id}" ${empty ? 'disabled' : ''} title="${esc(product.nombre)}">
 					${product.foto_url ? `<img class="product-thumb" src="${esc(product.foto_url)}" alt="" loading="lazy">` : '<span class="product-thumb product-thumb-empty" aria-hidden="true"></span>'}
 					<span class="product-name">${esc(product.nombre)}</span>
-					<span class="product-code">${product.codigo ? esc(product.codigo) : 'Sin código'}</span>
+					<span class="product-code">${product.codigo ? esc(product.codigo) : 'Sin cÃ³digo'}</span>
 					<span class="product-price">${moneyWhole(product.precio)}</span>
 					<span class="product-meta">
 						<span class="product-stock${empty ? ' empty' : low ? ' low' : ''}">${empty ? 'Sin stock' : `Stock: ${formatQty(product.stock)}`}</span>
@@ -440,7 +440,7 @@
 		}).join('');
 	}
 
-	/* ── Carrito ────────────────────────────────────────────── */
+	/* â”€â”€ Carrito â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 	function cartSubtotal() {
 		let subtotal = 0;
 		state.cart.forEach(({ product, qty }) => {
@@ -460,7 +460,7 @@
 		const product = state.products.find(item => Number(item.id) === Number(productId));
 		if (!product) return;
 		if (!product.activo) {
-			notify('Ese producto está inactivo.', 'error');
+			notify('Ese producto estÃ¡ inactivo.', 'error');
 			return;
 		}
 		if (product.stock <= 0) {
@@ -521,24 +521,24 @@
 		const container = $('posCartItems');
 		if (!container) return;
 		if (!state.cart.size) {
-			container.innerHTML = '<p class="pos-cart-empty">Agrega productos del catálogo para comenzar la venta.</p>';
+			container.innerHTML = '<p class="pos-cart-empty">Agrega productos del catÃ¡logo para comenzar la venta.</p>';
 		} else {
 			container.innerHTML = [...state.cart.values()].map(({ product, qty }) => `
 				<div class="pos-cart-item" data-cart-item="${product.id}">
 					<div class="cart-item-name" title="${esc(product.nombre)}">${esc(product.nombre)}</div>
 					<div class="cart-item-price">${moneyWhole(product.precio)} / ${esc(product.unidad || 'Unidad')}</div>
 					<div class="cart-item-controls">
-						<button class="qty-button" type="button" data-cart-minus="${product.id}" aria-label="Quitar uno">−</button>
+						<button class="qty-button" type="button" data-cart-minus="${product.id}" aria-label="Quitar uno">âˆ’</button>
 						<input class="qty-input" data-cart-qty="${product.id}" type="number" min="0.001" step="0.001" value="${qty}" aria-label="Cantidad de ${esc(product.nombre)}">
 						<button class="qty-button" type="button" data-cart-plus="${product.id}" aria-label="Agregar uno">+</button>
-						<button class="cart-remove" type="button" data-cart-remove="${product.id}" aria-label="Quitar producto">×</button>
+						<button class="cart-remove" type="button" data-cart-remove="${product.id}" aria-label="Quitar producto">Ã—</button>
 						<span class="cart-item-subtotal">${moneyWhole(product.precio * qty)}</span>
 					</div>
 				</div>`).join('');
 		}
 		const count = cartCount();
 		const countLabel = $('posCartCount');
-		if (countLabel) countLabel.textContent = `${formatQty(count)} artículo${count === 1 ? '' : 's'}`;
+		if (countLabel) countLabel.textContent = `${formatQty(count)} artÃ­culo${count === 1 ? '' : 's'}`;
 		updateTotals();
 	}
 	function updateTotals() {
@@ -587,7 +587,7 @@
 			received = total;
 			if (cashInput) cashInput.value = total > 0 ? total.toFixed(2) : '';
 		}
-		// Para pago en efectivo: usar lo que el usuario escribió (o 0 si vacío)
+		// Para pago en efectivo: usar lo que el usuario escribiÃ³ (o 0 si vacÃ­o)
 		// No auto-llenar con el total; el usuario ingresa su monto libremente
 		const change = round2(received - total);
 		if (changeBox) changeBox.classList.toggle('negative', change < -0.001);
@@ -615,7 +615,7 @@
 		updateTotals();
 	}
 
-	/* ── Cliente de la venta ────────────────────────────────── */
+	/* â”€â”€ Cliente de la venta â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 	function fillPosCustomers() {
 		const select = $('posCustomer');
 		if (!select) return;
@@ -655,13 +655,13 @@
 		if (!target) return;
 		const customer = selectedCustomer();
 		const rtn = normalizeRtn(customer?.rtn || '');
-		target.textContent = customer ? `RTN: ${rtn || 'sin RTN registrado'}` : 'RTN: —';
+		target.textContent = customer ? `RTN: ${rtn || 'sin RTN registrado'}` : 'RTN: â€”';
 		target.classList.toggle('missing', state.documentType === 'Factura' && !rtn);
 		const editButton = $('posEditClient');
 		if (editButton) editButton.hidden = !customer;
 		const editRow = $('posRtnEdit');
 		if (editRow && editRow.hidden === false) {
-			// si cambia de cliente mientras se edita, cancelar la edición
+			// si cambia de cliente mientras se edita, cancelar la ediciÃ³n
 			cancelRtnEdit();
 		}
 	}
@@ -727,12 +727,12 @@
 		const name = String($('quickClientName').value || '').trim();
 		const rtn = normalizeRtn($('quickClientRtn').value);
 		if (!name) {
-			notify('Escribe el nombre o la razón social del cliente.', 'error');
+			notify('Escribe el nombre o la razÃ³n social del cliente.', 'error');
 			$('quickClientName').focus();
 			return;
 		}
 		if (rtn && rtn.length !== 14) {
-			notify('El RTN debe tener exactamente 14 dígitos.', 'error');
+			notify('El RTN debe tener exactamente 14 dÃ­gitos.', 'error');
 			$('quickClientRtn').focus();
 			return;
 		}
@@ -763,7 +763,7 @@
 			const message = String(error.message || '').toLowerCase();
 			if (message.includes('could not find the function') || message.includes('schema cache') || isMissingModule(error)) {
 				showSetupBanner();
-				notify('Ejecuta la versión actualizada de "data base pos.sql" para registrar clientes con RTN.', 'error');
+				notify('Ejecuta la versiÃ³n actualizada de "data base pos.sql" para registrar clientes con RTN.', 'error');
 			} else {
 				notify(error.message || 'No se pudo guardar el cliente.', 'error');
 			}
@@ -810,7 +810,7 @@
 		updateDocumentTypeUi();
 	}
 
-	/* ── Resumen del día ────────────────────────────────────── */
+	/* â”€â”€ Resumen del dÃ­a â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 	async function loadTodaySummary() {
 		const database = getDb();
 		if (!database) return;
@@ -827,7 +827,7 @@
 				state.salesReady = false;
 				showSetupBanner();
 			} else {
-				notify(error.message || 'No se pudo consultar el resumen del día.', 'error');
+				notify(error.message || 'No se pudo consultar el resumen del dÃ­a.', 'error');
 			}
 			return;
 		}
@@ -884,7 +884,7 @@
 		await loadActiveCai();
 	}
 
-	/* ── Cobrar ─────────────────────────────────────────────── */
+	/* â”€â”€ Cobrar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 	async function chargeSale() {
 		if (state.busy || state.cart.size === 0) return;
 		const subtotal = cartSubtotal();
@@ -914,14 +914,14 @@
 			return;
 		}
 		if (documentType === 'Factura' && !customerRtn) {
-			notify('El cliente no tiene RTN. Agrégalo en Clientes o emite un recibo.', 'error');
+			notify('El cliente no tiene RTN. AgrÃ©galo en Clientes o emite un recibo.', 'error');
 			setView('customers');
 			return;
 		}
 		if (documentType === 'Factura') {
 			if (!state.cai) await loadActiveCai();
 			if (!state.cai) {
-				notify('No hay CAI activo configurado. Agrégalo en Configuración → CAI.', 'error');
+				notify('No hay CAI activo configurado. AgrÃ©galo en ConfiguraciÃ³n â†’ CAI.', 'error');
 				setView('settings');
 				return;
 			}
@@ -929,13 +929,13 @@
 			if (database) {
 				const { data: validation } = await database.rpc('validar_cai', { p_cai_id: state.cai.id });
 				if (validation && validation.valido === false) {
-					notify(validation.mensaje || 'El CAI no es válido.', 'error');
+					notify(validation.mensaje || 'El CAI no es vÃ¡lido.', 'error');
 					return;
 				}
 			}
 		}
 		if (state.cashReady && isCashRole() && !state.currentCash) {
-			notify('Abre tu caja para iniciar el día antes de registrar la venta.', 'error');
+			notify('Abre tu caja para iniciar el dÃ­a antes de registrar la venta.', 'error');
 			setView('cash');
 			return;
 		}
@@ -986,7 +986,7 @@
 			}
 			const sale = Array.isArray(data) ? data[0] : data;
 			if (!sale) {
-				notify('La venta se guardó, pero no se pudo abrir el ticket.', 'error');
+				notify('La venta se guardÃ³, pero no se pudo abrir el ticket.', 'error');
 				return;
 			}
 			notify(`Venta #${padSale(sale.numero_venta)} registrada.`);
@@ -1003,14 +1003,14 @@
 		}
 	}
 
-	/* ── Inventario: formulario y lista ─────────────────────── */
+	/* â”€â”€ Inventario: formulario y lista â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 	async function renderProductsView(force = false) {
 		if (!isPosRole() || !$('productsView')) return;
 		await loadProducts(force);
 		renderProductList();
 	}
 
-	/* ── Código de barras (EAN-13) y etiquetas ───────────────── */
+	/* â”€â”€ CÃ³digo de barras (EAN-13) y etiquetas â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 	const EAN13 = {
 		L: ['0001101', '0011001', '0010011', '0111101', '0100011', '0110001', '0101111', '0111011', '0110111', '0001011'],
 		G: ['0100111', '0110011', '0011011', '0100001', '0011101', '0111001', '0000101', '0010001', '0001001', '0010111'],
@@ -1109,14 +1109,14 @@
 		setTimeout(() => win.print(), 350);
 	}
 
-	/* ── Foto del producto ──────────────────────────────────── */
+	/* â”€â”€ Foto del producto â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 	function renderBarcodePreview(code) {
 		const target = $('productBarcodePreview');
 		if (!target) return;
 		const value = String(code || '').trim();
 		target.innerHTML = value && /^\d{13}$/.test(value)
 			? barcodeSvg(value, { width: 2, height: 34 })
-			: (value ? `<span class="barcode-note">Código propio: ${esc(value)}</span>` : '');
+			: (value ? `<span class="barcode-note">CÃ³digo propio: ${esc(value)}</span>` : '');
 	}
 	async function compressProductPhoto(file, maxSize = 800) {
 		try {
@@ -1167,7 +1167,7 @@
 			return;
 		}
 		if (file.size > 8 * 1024 * 1024) {
-			notify('La imagen es muy grande (máximo 8 MB).', 'error');
+			notify('La imagen es muy grande (mÃ¡ximo 8 MB).', 'error');
 			return;
 		}
 		const hint = $('productPhotoHint');
@@ -1188,7 +1188,7 @@
 		if (!photo.file) return '';
 		const database = getDb();
 		if (!database || !database.storage || !database.storage.from) {
-			notify('El almacenamiento de imágenes no está disponible.', 'error');
+			notify('El almacenamiento de imÃ¡genes no estÃ¡ disponible.', 'error');
 			return '';
 		}
 		const folder = database.storage.from('productos');
@@ -1283,11 +1283,11 @@
 			return;
 		}
 		if ([values.p_precio, values.p_costo, values.p_stock, values.p_stock_minimo].some(value => !Number.isFinite(value) || value < 0)) {
-			notify('Revisa el precio, costo y stock: deben ser números mayores o iguales a cero.', 'error');
+			notify('Revisa el precio, costo y stock: deben ser nÃºmeros mayores o iguales a cero.', 'error');
 			return;
 		}
 		if (!Number.isFinite(values.p_impuesto_porcentaje) || values.p_impuesto_porcentaje < 0 || values.p_impuesto_porcentaje > 100) {
-			notify('El ISV debe ser un número entre 0 y 100.', 'error');
+			notify('El ISV debe ser un nÃºmero entre 0 y 100.', 'error');
 			$('productTax').focus();
 			return;
 		}
@@ -1322,7 +1322,7 @@
 			notify(error.message || 'No se pudo guardar el producto.', 'error');
 			return;
 		}
-		notify(values.id ? 'Producto actualizado.' : 'Producto agregado al catálogo.');
+		notify(values.id ? 'Producto actualizado.' : 'Producto agregado al catÃ¡logo.');
 		resetProductForm();
 		await loadProducts(true);
 		if (!$('posView').hidden) {
@@ -1355,8 +1355,8 @@
 			setEmpty(list, state.products.length
 				? 'No hay productos que coincidan con el filtro.'
 				: state.setupMissing
-					? 'El inventario todavía no está activo. Ejecuta "data base pos.sql" en Supabase.'
-					: 'Todavía no hay productos. Agrega el primero con el formulario.');
+					? 'El inventario todavÃ­a no estÃ¡ activo. Ejecuta "data base pos.sql" en Supabase.'
+					: 'TodavÃ­a no hay productos. Agrega el primero con el formulario.');
 			return;
 		}
 		list.innerHTML = products.map(product => {
@@ -1378,13 +1378,13 @@
 							${product.activo ? '' : '<span class="status-pill amber">Inactivo</span>'}
 						</div>
 						<p class="product-row-meta">
-							${product.codigo ? `<span>Código: ${esc(product.codigo)}</span>` : '<span>Sin código</span>'}
+							${product.codigo ? `<span>CÃ³digo: ${esc(product.codigo)}</span>` : '<span>Sin cÃ³digo</span>'}
 							<span>${esc(product.categoria || 'General')}</span>
 							<span>${esc(product.unidad || 'Unidad')}</span>
 							<span class="product-row-price">${moneyWhole(product.precio)}</span>
-							<span>ISV ${formatQty(taxRate(product))}% · Base ${money(priceWithoutTax(product))}</span>
+							<span>ISV ${formatQty(taxRate(product))}% Â· Base ${money(priceWithoutTax(product))}</span>
 							<span>Costo: ${moneyWhole(product.costo)}</span>
-							<span>Mínimo: ${formatQty(product.stock_minimo)}</span>
+							<span>MÃ­nimo: ${formatQty(product.stock_minimo)}</span>
 						</p>
 					</div>
 					<div class="row-actions">
@@ -1403,7 +1403,7 @@
 		if (value === null) return;
 		const nextStock = round3(Number(value));
 		if (!Number.isFinite(nextStock) || nextStock < 0) {
-			notify('El stock debe ser un número mayor o igual a cero.', 'error');
+			notify('El stock debe ser un nÃºmero mayor o igual a cero.', 'error');
 			return;
 		}
 		const note = window.prompt('Nota del ajuste (opcional):', 'Ajuste manual');
@@ -1467,12 +1467,12 @@
 			return;
 		}
 		const rows = [
-			['Código', 'Nombre', 'Categoría', 'Unidad', 'Precio con ISV', 'Base sin ISV', 'ISV %', 'Costo', 'Stock', 'Stock mínimo', 'Activo'],
+			['CÃ³digo', 'Nombre', 'CategorÃ­a', 'Unidad', 'Precio con ISV', 'Base sin ISV', 'ISV %', 'Costo', 'Stock', 'Stock mÃ­nimo', 'Activo'],
 			...state.products.map(product => [
 				product.codigo || '', product.nombre, product.categoria || 'General', product.unidad || 'Unidad',
 				Number(product.precio || 0).toFixed(2), priceWithoutTax(product).toFixed(2), taxRate(product).toFixed(2),
 				Number(product.costo || 0).toFixed(2),
-				product.stock, product.stock_minimo, product.activo ? 'Sí' : 'No'
+				product.stock, product.stock_minimo, product.activo ? 'SÃ­' : 'No'
 			])
 		];
 		const csv = '\uFEFF' + rows.map(row => row.map(csvCell).join(',')).join('\r\n');
@@ -1488,7 +1488,7 @@
 		notify('Inventario exportado a CSV.');
 	}
 
-	/* ── Ventas ─────────────────────────────────────────────── */
+	/* â”€â”€ Ventas â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 	function initSalesDates() {
 		if (state.salesDatesInitialized) return;
 		state.salesDatesInitialized = true;
@@ -1573,8 +1573,8 @@
 		if (count) count.textContent = `${sales.length} venta${sales.length === 1 ? '' : 's'}`;
 		if (!sales.length) {
 			setEmpty(list, state.setupMissing
-				? 'El módulo de ventas todavía no está activo. Ejecuta "data base pos.sql" en Supabase.'
-				: 'No hay ventas en el período seleccionado.');
+				? 'El mÃ³dulo de ventas todavÃ­a no estÃ¡ activo. Ejecuta "data base pos.sql" en Supabase.'
+				: 'No hay ventas en el perÃ­odo seleccionado.');
 			return;
 		}
 		const canAnnul = ws().activeUserRole === 'admin';
@@ -1583,8 +1583,8 @@
 			return `
 				<div class="data-row sales-row">
 					<div class="row-main">
-						<strong><span class="sale-number">#${padSale(sale.numero_venta)}</span> · ${esc(sale.cliente_nombre || 'Consumidor Final')} <span class="doc-badge ${documentTypeOf(sale) === 'Factura' ? 'invoice' : 'receipt'}">${documentLabel(sale)}</span></strong>
-						<p>${esc(formatDateTime(sale.fecha))} · ${esc(sale.metodo_pago || 'Efectivo')}${sale.banco ? ` · ${esc(sale.banco)}` : ''}${sale.cliente_rtn ? ` · RTN ${esc(sale.cliente_rtn)}` : ''}${sale.vendedor_nombre ? ` · Vendedor ${esc(sale.vendedor_nombre)}` : ''} · <span class="sale-status${annulled ? ' annulled' : ''}">${esc(sale.estado || 'Completada')}</span></p>
+						<strong><span class="sale-number">#${padSale(sale.numero_venta)}</span> Â· ${esc(sale.cliente_nombre || 'Consumidor Final')} <span class="doc-badge ${documentTypeOf(sale) === 'Factura' ? 'invoice' : 'receipt'}">${documentLabel(sale)}</span></strong>
+						<p>${esc(formatDateTime(sale.fecha))} Â· ${esc(sale.metodo_pago || 'Efectivo')}${sale.banco ? ` Â· ${esc(sale.banco)}` : ''}${sale.cliente_rtn ? ` Â· RTN ${esc(sale.cliente_rtn)}` : ''}${sale.vendedor_nombre ? ` Â· Vendedor ${esc(sale.vendedor_nombre)}` : ''} Â· <span class="sale-status${annulled ? ' annulled' : ''}">${esc(sale.estado || 'Completada')}</span></p>
 					</div>
 					<div class="row-actions">
 						<span class="sale-total">${money(sale.total)}</span>
@@ -1654,7 +1654,7 @@
 			<tr>
 				<td>
 					<span class="ticket-item-name">${esc(detail.nombre)}</span>
-					<span class="ticket-item-detail">${formatQty(detail.cantidad)} x ${moneyWhole(detail.precio_unitario)} · ISV ${formatQty(rate)}%</span>
+					<span class="ticket-item-detail">${formatQty(detail.cantidad)} x ${moneyWhole(detail.precio_unitario)} Â· ISV ${formatQty(rate)}%</span>
 				</td>
 				<td>${moneyWhole(detail.subtotal)}</td>
 			</tr>`;
@@ -1663,7 +1663,7 @@
 			<div class="ticket-paper">
 				<div class="ticket-center">
 					<p class="ticket-brand">${esc(settings.negocio || 'WS ABARROTES').toUpperCase()}</p>
-					<p class="ticket-sub">${esc(settings.direccion || 'Punto de venta · Abarrotes')}</p>
+					<p class="ticket-sub">${esc(settings.direccion || 'Punto de venta Â· Abarrotes')}</p>
 					${settings.telefono ? `<p class="ticket-sub">Tel. ${esc(settings.telefono)}</p>` : ''}
 					${businessRtn ? `<p class="ticket-sub">RTN: ${esc(businessRtn)}</p>` : ''}
 					<p class="ticket-document">${isInvoice ? 'FACTURA COMERCIAL' : 'RECIBO DE VENTA'}</p>
@@ -1672,8 +1672,8 @@
 				<div class="ticket-line"><span>${isInvoice ? 'Factura' : 'Recibo'}</span><span>#${padSale(sale.numero_venta)}</span></div>
 				<div class="ticket-line"><span>Fecha</span><span>${esc(formatDateTime(sale.fecha))}</span></div>
 				<div class="ticket-line"><span>Cliente</span><span>${esc(sale.cliente_nombre || 'Consumidor Final')}</span></div>
-				${isInvoice || customerRtn ? `<div class="ticket-line"><span>RTN cliente</span><span>${esc(customerRtn || '—')}</span></div>` : ''}
-				<div class="ticket-line"><span>Vendedor</span><span>${esc(sale.vendedor_nombre || ws().activeUserName || '—')}</span></div>
+				${isInvoice || customerRtn ? `<div class="ticket-line"><span>RTN cliente</span><span>${esc(customerRtn || 'â€”')}</span></div>` : ''}
+				<div class="ticket-line"><span>Vendedor</span><span>${esc(sale.vendedor_nombre || ws().activeUserName || 'â€”')}</span></div>
 				${annulled ? `<div class="ticket-annulled">VENTA ANULADA${sale.motivo_anulacion ? `<br>${esc(sale.motivo_anulacion)}` : ''}</div>` : ''}
 				<div class="ticket-rule"></div>
 				<table class="ticket-items">
@@ -1689,7 +1689,7 @@
 				${isInvoice && cai ? `<div class="ticket-line"><span>CAI</span><span>${esc(cai.cai)}</span></div>
 				<div class="ticket-line"><span>Factura</span><span>${esc(sale.numero_factura || '')}</span></div>
 				<div class="ticket-line"><span>Rango</span><span>${esc(cai.establecimiento)}-${esc(cai.punto_emision)}-${esc(cai.tipo_documento)}-${esc(String(cai.correlativo_desde).padStart(6, '0'))} a ${esc(String(cai.correlativo_hasta).padStart(6, '0'))}</span></div>
-				<div class="ticket-line"><span>Válido hasta</span><span>${esc(formatDate(cai.fecha_limite))}</span></div>` : ''}
+				<div class="ticket-line"><span>VÃ¡lido hasta</span><span>${esc(formatDate(cai.fecha_limite))}</span></div>` : ''}
 				<div class="ticket-line"><span>Monto en letras</span><span>${esc(numeroALetras(total))}</span></div>
 					<div class="ticket-line"><span>Pago</span><span>${esc(sale.metodo_pago || 'Efectivo')}</span></div>
 					${sale.banco ? `<div class="ticket-line"><span>Banco / POS</span><span>${esc(sale.banco)}</span></div>` : ''}
@@ -1697,7 +1697,7 @@
 				</div>
 				${sale.nota ? `<div class="ticket-rule"></div><div class="ticket-sub">Nota: ${esc(sale.nota)}</div>` : ''}
 				<div class="ticket-rule"></div>
-				<p class="ticket-foot">${esc(settings.pie || '¡Gracias por su compra!')}<br>${esc(settings.negocio || 'WS Abarrotes')} · Precios con ISV incluido</p>
+				<p class="ticket-foot">${esc(settings.pie || 'Â¡Gracias por su compra!')}<br>${esc(settings.negocio || 'WS Abarrotes')} Â· Precios con ISV incluido</p>
 			</div>`;
 	}
 	function closeTicket() {
@@ -1753,13 +1753,13 @@
 		const sale = state.sales.find(item => Number(item.id) === Number(saleId));
 		if (!sale) return;
 		if (sale.estado === 'Anulada') {
-			notify('La venta ya está anulada.', 'error');
+			notify('La venta ya estÃ¡ anulada.', 'error');
 			return;
 		}
-		const reason = window.prompt(`Motivo de la anulación de la venta #${padSale(sale.numero_venta)}:`, '');
+		const reason = window.prompt(`Motivo de la anulaciÃ³n de la venta #${padSale(sale.numero_venta)}:`, '');
 		if (reason === null) return;
 		if (!reason.trim()) {
-			notify('Escribe el motivo de la anulación.', 'error');
+			notify('Escribe el motivo de la anulaciÃ³n.', 'error');
 			return;
 		}
 		const database = await ensureWritable();
@@ -1783,7 +1783,7 @@
 		}
 	}
 
-	/* ── Eventos ────────────────────────────────────────────── */
+	/* â”€â”€ Eventos â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 	function bindEvents() {
 		const posSearch = $('posSearch');
 		posSearch?.addEventListener('input', renderPOSProducts);
@@ -1805,7 +1805,7 @@
 				posSearch.value = '';
 				renderPOSProducts();
 			} else if (!visible.length) {
-				notify('No se encontró un producto con esa búsqueda.', 'error');
+				notify('No se encontrÃ³ un producto con esa bÃºsqueda.', 'error');
 			} else {
 				notify('Selecciona uno de los productos de la lista.');
 			}
@@ -1944,7 +1944,7 @@
 			if (input) input.value = '';
 			renderProductPhotoPreview('');
 			const hint = $('productPhotoHint');
-			if (hint) hint.textContent = 'La foto se quitará al guardar el producto.';
+			if (hint) hint.textContent = 'La foto se quitarÃ¡ al guardar el producto.';
 		});
 		$('productSearch')?.addEventListener('input', renderProductList);
 		$('productFilter')?.addEventListener('change', renderProductList);
@@ -1952,7 +1952,7 @@
 			const code = generateBarcode();
 			$('productCode').value = code;
 			renderBarcodePreview(code);
-			notify(`Código generado: ${code}`);
+			notify(`CÃ³digo generado: ${code}`);
 		});
 		$('productCode')?.addEventListener('input', () => renderBarcodePreview($('productCode').value));		$('productList')?.addEventListener('click', event => {
 			const label = event.target.closest('[data-product-label]');
@@ -2270,7 +2270,7 @@
 			}
 		});
 
-		// Acciones de los módulos que viven dentro de los paneles (no en la cinta).
+		// Acciones de los mÃ³dulos que viven dentro de los paneles (no en la cinta).
 		document.addEventListener('click', event => {
 			if (event.target.closest('#ribbon')) return;
 			const command = event.target.closest('[data-pos-action]');
@@ -2291,7 +2291,7 @@
 		});
 	}
 
-	/* ── Sincronización entre dispositivos ───────────────────── */
+	/* â”€â”€ SincronizaciÃ³n entre dispositivos â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 	const AUTO_REFRESH_MS = 30000;
 	function autoRefreshTick() {
 		if (document.hidden) return;
@@ -2308,7 +2308,7 @@
 		setInterval(autoRefreshTick, AUTO_REFRESH_MS);
 	}
 
-	/* ── Inicio / dashboard ─────────────────────────────────── */
+	/* â”€â”€ Inicio / dashboard â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 	async function renderDashboardView(force = false) {
 		if (!isPosRole() || !$('dashboardView')) return;
 		await loadProducts(force);
@@ -2337,7 +2337,7 @@
 				<div class="dashboard-metric"><span>Ventas de hoy</span><strong>${completed.length}</strong><small>${money(total)} cobrados</small></div>
 				<div class="dashboard-metric tax"><span>ISV 15% de hoy</span><strong>${money(tax)}</strong><small>Incluido en el precio de venta</small></div>
 				<div class="dashboard-metric"><span>Base gravable</span><strong>${money(base)}</strong><small>Total menos ISV</small></div>
-				<div class="dashboard-metric"><span>Efectivo en caja</span><strong>${money(cashExpected)}</strong><small>${cashOpen ? 'Caja abierta' : 'Sin caja abierta'} · ${money(cashSales)} en efectivo</small></div>
+				<div class="dashboard-metric"><span>Efectivo en caja</span><strong>${money(cashExpected)}</strong><small>${cashOpen ? 'Caja abierta' : 'Sin caja abierta'} Â· ${money(cashSales)} en efectivo</small></div>
 				<div class="dashboard-metric"><span>Productos activos</span><strong>${activeProducts.length}</strong><small>${lowStock.length} con stock bajo</small></div>
 				<div class="dashboard-metric"><span>Valor del inventario</span><strong>${money(inventoryCost)}</strong><small>Venta estimada ${money(inventorySale)}</small></div>`;
 		}
@@ -2355,8 +2355,8 @@
 					<span class="tax" style="width:${taxPct}%"></span>
 				</div>
 				<div class="dashboard-tax-legend">
-					<span><i class="base"></i>Base gravable ${money(base)} · ${basePct}%</span>
-					<span><i class="tax"></i>ISV 15% ${money(tax)} · ${taxPct}%</span>
+					<span><i class="base"></i>Base gravable ${money(base)} Â· ${basePct}%</span>
+					<span><i class="tax"></i>ISV 15% ${money(tax)} Â· ${taxPct}%</span>
 					<span><i class="total"></i>Total ${money(total)}</span>
 				</div>
 				<div class="dashboard-tax-legend">
@@ -2371,14 +2371,14 @@
 		if (recentTarget) {
 			if (!recent.length) {
 				setEmpty(recentTarget, state.setupMissing
-					? 'El módulo de ventas todavía no está activo. Ejecuta "data base pos.sql" en Supabase.'
-					: 'Todavía no hay ventas registradas.');
+					? 'El mÃ³dulo de ventas todavÃ­a no estÃ¡ activo. Ejecuta "data base pos.sql" en Supabase.'
+					: 'TodavÃ­a no hay ventas registradas.');
 			} else {
 				recentTarget.innerHTML = recent.map(sale => `
 					<div class="data-row dashboard-sale-row">
 						<div class="row-main">
-							<strong>#${padSale(sale.numero_venta)} · ${esc(sale.cliente_nombre || 'Consumidor Final')}</strong>
-							<p>${esc(formatDateTime(sale.fecha))} · ${documentLabel(sale)}${sale.cliente_rtn ? ` · RTN ${esc(sale.cliente_rtn)}` : ''}</p>
+							<strong>#${padSale(sale.numero_venta)} Â· ${esc(sale.cliente_nombre || 'Consumidor Final')}</strong>
+							<p>${esc(formatDateTime(sale.fecha))} Â· ${documentLabel(sale)}${sale.cliente_rtn ? ` Â· RTN ${esc(sale.cliente_rtn)}` : ''}</p>
 						</div>
 						<div class="row-actions"><span class="sale-total">${money(sale.total)}</span></div>
 					</div>`).join('');
@@ -2389,14 +2389,14 @@
 		if (lowTarget) {
 			if (!lowStock.length) {
 				setEmpty(lowTarget, state.setupMissing
-					? 'El inventario todavía no está activo. Ejecuta "data base pos.sql" en Supabase.'
-					: 'No hay productos por debajo del stock mínimo.');
+					? 'El inventario todavÃ­a no estÃ¡ activo. Ejecuta "data base pos.sql" en Supabase.'
+					: 'No hay productos por debajo del stock mÃ­nimo.');
 			} else {
 				lowTarget.innerHTML = lowStock.slice(0, 8).map(product => `
 					<div class="data-row dashboard-low-row">
 						<div class="row-main">
 							<strong>${esc(product.nombre)}</strong>
-							<p>${esc(product.categoria || 'General')} · mínimo ${formatQty(product.stock_minimo)}</p>
+							<p>${esc(product.categoria || 'General')} Â· mÃ­nimo ${formatQty(product.stock_minimo)}</p>
 						</div>
 						<div class="row-actions"><span class="stock-badge low">${formatQty(product.stock)}</span></div>
 					</div>`).join('');
@@ -2411,15 +2411,15 @@
 				.map(sale => sale.vendedor_nombre))];
 			if (!openCashes.length && !sellers.length) {
 				setEmpty(cashTarget, state.setupMissing
-					? 'El módulo de caja todavía no está activo. Ejecuta "data base pos.sql" en Supabase.'
-					: 'Todavía no hay cajas abiertas ni ventas del día.');
+					? 'El mÃ³dulo de caja todavÃ­a no estÃ¡ activo. Ejecuta "data base pos.sql" en Supabase.'
+					: 'TodavÃ­a no hay cajas abiertas ni ventas del dÃ­a.');
 			} else {
 				cashTarget.innerHTML = [
 					...openCashes.map(caja => `
 						<div class="data-row dashboard-low-row">
 							<div class="row-main">
 								<strong>${esc(caja.usuario_nombre || 'Caja')}</strong>
-								<p>Caja abierta · inicial ${money(caja.monto_inicial)}</p>
+								<p>Caja abierta Â· inicial ${money(caja.monto_inicial)}</p>
 							</div>
 							<div class="row-actions"><span class="stock-badge low">${esc(caja.fecha || '')}</span></div>
 						</div>`),
@@ -2438,7 +2438,7 @@
 		await renderDashboardView(true);
 	}
 
-	/* ── Clientes ───────────────────────────────────────────── */
+	/* â”€â”€ Clientes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 	async function loadCustomers(force = false) {
 		if (state.loadingCustomers) return state.customers;
 		if (state.customersLoaded && !force) return state.customers;
@@ -2490,15 +2490,15 @@
 		if (count) count.textContent = `${customers.length} cliente${customers.length === 1 ? '' : 's'}`;
 		if (!customers.length) {
 			setEmpty(list, state.setupMissing
-				? 'El módulo de clientes todavía no está activo. Ejecuta "data base pos.sql" en Supabase.'
-				: 'No hay clientes registrados con esa búsqueda.');
+				? 'El mÃ³dulo de clientes todavÃ­a no estÃ¡ activo. Ejecuta "data base pos.sql" en Supabase.'
+				: 'No hay clientes registrados con esa bÃºsqueda.');
 			return;
 		}
 		list.innerHTML = customers.map(client => `
 			<div class="data-row customer-row">
 				<div class="row-main">
 					<strong>${esc(client.nombre)}</strong>
-					<p>RTN ${esc(client.rtn || '—')}${client.telefono ? ` · ${esc(client.telefono)}` : ''}${client.correo ? ` · ${esc(client.correo)}` : ''}</p>
+					<p>RTN ${esc(client.rtn || 'â€”')}${client.telefono ? ` Â· ${esc(client.telefono)}` : ''}${client.correo ? ` Â· ${esc(client.correo)}` : ''}</p>
 				</div>
 				<div class="row-actions">
 					<button class="button small" type="button" data-customer-use="${client.id}">Usar en venta</button>
@@ -2540,12 +2540,12 @@
 		const name = String($('customerName').value || '').trim();
 		const rtn = normalizeRtn($('customerRtn').value);
 		if (!name) {
-			notify('Escribe el nombre o la razón social del cliente.', 'error');
+			notify('Escribe el nombre o la razÃ³n social del cliente.', 'error');
 			$('customerName').focus();
 			return;
 		}
 		if (rtn && rtn.length !== 14) {
-			notify('El RTN debe tener exactamente 14 dígitos.', 'error');
+			notify('El RTN debe tener exactamente 14 dÃ­gitos.', 'error');
 			$('customerRtn').focus();
 			return;
 		}
@@ -2567,7 +2567,7 @@
 			const message = String(error.message || '').toLowerCase();
 			if (message.includes('could not find the function') || message.includes('schema cache') || isMissingModule(error)) {
 				showSetupBanner();
-				notify('Ejecuta la versión actualizada de "data base pos.sql" para guardar clientes con RTN.', 'error');
+				notify('Ejecuta la versiÃ³n actualizada de "data base pos.sql" para guardar clientes con RTN.', 'error');
 			} else {
 				notify(error.message || 'No se pudo guardar el cliente.', 'error');
 			}
@@ -2586,7 +2586,7 @@
 		updateCustomerTax();
 	}
 
-	/* ── Inventario ─────────────────────────────────────────── */
+	/* â”€â”€ Inventario â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 	async function loadInventory(force = false) {
 		if (state.loadingInventory) return state.inventory;
 		if (state.inventoryLoaded && !force) return state.inventory;
@@ -2660,7 +2660,7 @@
 		if (count) count.textContent = `${rows.length} movimiento${rows.length === 1 ? '' : 's'}`;
 		if (!rows.length) {
 			setEmpty(list, state.setupMissing
-				? 'El inventario todavía no está activo. Ejecuta "data base pos.sql" en Supabase.'
+				? 'El inventario todavÃ­a no estÃ¡ activo. Ejecuta "data base pos.sql" en Supabase.'
 				: 'No hay movimientos para el filtro seleccionado.');
 			return;
 		}
@@ -2671,11 +2671,11 @@
 				<div class="data-row inventory-row">
 					<div class="row-main">
 						<strong>${esc(name)} <span class="movement-badge ${esc(String(movement.tipo).toLowerCase())}">${esc(movement.tipo)}</span></strong>
-						<p>${esc(formatDateTime(movement.creado_en))} · ${esc(movement.referencia || 'Sin referencia')}${movement.nota ? ` · ${esc(movement.nota)}` : ''}</p>
+						<p>${esc(formatDateTime(movement.creado_en))} Â· ${esc(movement.referencia || 'Sin referencia')}${movement.nota ? ` Â· ${esc(movement.nota)}` : ''}</p>
 					</div>
 					<div class="row-actions inventory-values">
 						<span class="${positive ? 'stock-in' : 'stock-out'}">${positive ? '+' : ''}${formatQty(movement.cantidad)}</span>
-						<small>${formatQty(movement.stock_anterior)} → ${formatQty(movement.stock_nuevo)}</small>
+						<small>${formatQty(movement.stock_anterior)} â†’ ${formatQty(movement.stock_nuevo)}</small>
 					</div>
 				</div>`;
 		}).join('');
@@ -2699,7 +2699,7 @@
 		notify('Movimientos de inventario exportados a CSV.');
 	}
 
-	/* ── Reportes ───────────────────────────────────────────── */
+	/* â”€â”€ Reportes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 	function initReportsDates() {
 		if (state.reportsDatesInitialized) return;
 		const now = new Date();
@@ -2797,7 +2797,7 @@
 		const discounts = round2(completed.reduce((sum, sale) => sum + Number(sale.descuento || 0), 0));
 		const average = completed.length ? round2(total / completed.length) : 0;
 		const rangeLabel = $('reportsRangeLabel');
-		if (rangeLabel) rangeLabel.textContent = `${ws().formatDate?.(report.from) || report.from} — ${ws().formatDate?.(report.to) || report.to}`;
+		if (rangeLabel) rangeLabel.textContent = `${ws().formatDate?.(report.from) || report.from} â€” ${ws().formatDate?.(report.to) || report.to}`;
 		const metrics = $('reportsMetrics');
 		if (metrics) {
 			metrics.innerHTML = `
@@ -2842,7 +2842,7 @@
 				<div class="report-row">
 					<div class="report-row-head"><span>${index + 1}. ${esc(product.nombre)}</span><strong>${money(product.total)}</strong></div>
 					<small>${formatQty(product.cantidad)} unidades vendidas</small>
-				</div>`).join('') : '<p class="empty-note">Sin productos vendidos en el período.</p>';
+				</div>`).join('') : '<p class="empty-note">Sin productos vendidos en el perÃ­odo.</p>';
 		}
 
 		const taxTarget = $('reportsTax');
@@ -2859,18 +2859,18 @@
 			taxTarget.innerHTML = rows.length ? rows.map(([rate, values]) => `
 				<div class="report-row">
 					<div class="report-row-head"><span>ISV ${formatQty(rate)}%</span><strong>${money(values.tax)}</strong></div>
-					<small>Base ${money(round2(values.gross - values.tax))} · Bruto ${money(values.gross)}</small>
-				</div>`).join('') : '<p class="empty-note">Sin detalle de ISV para el período.</p>';
+					<small>Base ${money(round2(values.gross - values.tax))} Â· Bruto ${money(values.gross)}</small>
+				</div>`).join('') : '<p class="empty-note">Sin detalle de ISV para el perÃ­odo.</p>';
 		}
 	}
 	function exportReport() {
 		const report = state.reports;
 		if (!report || !report.sales.length) {
-			notify('No hay ventas para exportar en el período.', 'error');
+			notify('No hay ventas para exportar en el perÃ­odo.', 'error');
 			return;
 		}
 		const rows = [
-			['Documento', 'Número', 'Fecha', 'Cliente', 'RTN', 'Base gravable', 'ISV', 'Descuento', 'Total', 'Pago', 'Estado', 'Nota'],
+			['Documento', 'NÃºmero', 'Fecha', 'Cliente', 'RTN', 'Base gravable', 'ISV', 'Descuento', 'Total', 'Pago', 'Estado', 'Nota'],
 			...report.sales.map(sale => [
 				documentLabel(sale), padSale(sale.numero_venta), formatDateTime(sale.fecha),
 				sale.cliente_nombre || 'Consumidor Final', sale.cliente_rtn || '',
@@ -2883,7 +2883,7 @@
 		notify('Reporte de ventas exportado a CSV.');
 	}
 
-	/* ── Configuración ──────────────────────────────────────── */
+	/* â”€â”€ ConfiguraciÃ³n â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 	function renderSettingsView() {
 		const settings = state.settings;
 		const values = {
@@ -2908,7 +2908,7 @@
 		if (!form || !form.reportValidity()) return;
 		const rtn = normalizeRtn($('settingsRtn').value);
 		if (rtn && rtn.length !== 14) {
-			notify('El RTN del negocio debe tener exactamente 14 dígitos.', 'error');
+			notify('El RTN del negocio debe tener exactamente 14 dÃ­gitos.', 'error');
 			$('settingsRtn').focus();
 			return;
 		}
@@ -2929,13 +2929,13 @@
 			stockMinimo: round3(Number($('settingsStockMin').value || 0)),
 			moneda: String($('settingsCurrency').value || 'L.').trim() || 'L.'
 		});
-		notify('Configuración guardada. Se aplicará en las próximas facturas.');
+		notify('ConfiguraciÃ³n guardada. Se aplicarÃ¡ en las prÃ³ximas facturas.');
 		renderSettingsView();
 	}
 	function resetSettingsForm() {
 		persistSettings(DEFAULT_SETTINGS);
 		renderSettingsView();
-		notify('Configuración restaurada.');
+		notify('ConfiguraciÃ³n restaurada.');
 	}
 	async function renderCaiForm() {
 		if (!state.cai) {
@@ -2956,7 +2956,7 @@
 			caiNegocio: cai?.negocio || 'WS Abarrotes',
 			caiDireccion: cai?.direccion || '',
 			caiTelefono: cai?.telefono || '',
-			caiPie: cai?.pie_factura || '¡Gracias por su compra!'
+			caiPie: cai?.pie_factura || 'Â¡Gracias por su compra!'
 		};
 		Object.entries(fields).forEach(([id, value]) => {
 			const field = $(id);
@@ -2972,23 +2972,23 @@
 		if (!state.cai) await loadActiveCai();
 		const cai = state.cai;
 		if (!cai) {
-			target.innerHTML = '<p class="empty-note">No hay CAI activo configurado. Agrégalo en este formulario.</p>';
+			target.innerHTML = '<p class="empty-note">No hay CAI activo configurado. AgrÃ©galo en este formulario.</p>';
 			return;
 		}
 		const available = cai.correlativo_hasta - cai.correlativo_actual;
 		const daysLeft = Math.floor((new Date(cai.fecha_limite) - new Date()) / (1000 * 60 * 60 * 24));
 		let alert = '';
-		if (available < 5) alert = '<p class="field-hint" style="color:#a4262c;">⚠️ Solo quedan menos de 5 facturas disponibles. Solicita un nuevo rango.</p>';
-		else if (available < 20) alert = '<p class="field-hint" style="color:#b46900;">⚠️ Quedan menos de 20 facturas. Considera solicitar un nuevo rango.</p>';
-		if (daysLeft < 30) alert += '<p class="field-hint" style="color:#b46900;">⚠️ El CAI vence en menos de 30 días.</p>';
+		if (available < 5) alert = '<p class="field-hint" style="color:#a4262c;">âš ï¸ Solo quedan menos de 5 facturas disponibles. Solicita un nuevo rango.</p>';
+		else if (available < 20) alert = '<p class="field-hint" style="color:#b46900;">âš ï¸ Quedan menos de 20 facturas. Considera solicitar un nuevo rango.</p>';
+		if (daysLeft < 30) alert += '<p class="field-hint" style="color:#b46900;">âš ï¸ El CAI vence en menos de 30 dÃ­as.</p>';
 		target.innerHTML = `
 			<div class="settings-note">
 				<p><strong>CAI activo:</strong> ${esc(cai.cai)}</p>
 				<p><strong>Negocio:</strong> ${esc(cai.negocio)}</p>
 				<p><strong>RTN:</strong> ${esc(normalizeRtn(cai.rtn_emisor))}</p>
 				<p><strong>Rango:</strong> ${esc(String(cai.correlativo_desde).padStart(6, '0'))} - ${esc(String(cai.correlativo_hasta).padStart(6, '0'))}</p>
-				<p><strong>Usadas:</strong> ${esc(String(cai.correlativo_actual))} · <strong>Disponibles:</strong> ${esc(String(available))}</p>
-				<p><strong>Válido hasta:</strong> ${esc(formatDate(cai.fecha_limite))} (${daysLeft} días)</p>
+				<p><strong>Usadas:</strong> ${esc(String(cai.correlativo_actual))} Â· <strong>Disponibles:</strong> ${esc(String(available))}</p>
+				<p><strong>VÃ¡lido hasta:</strong> ${esc(formatDate(cai.fecha_limite))} (${daysLeft} dÃ­as)</p>
 				${alert}
 			</div>`;
 	}
@@ -3003,19 +3003,19 @@
 			return;
 		}
 		if (rtn.length !== 14) {
-			notify('El RTN del emisor debe tener 14 dígitos.', 'error');
+			notify('El RTN del emisor debe tener 14 dÃ­gitos.', 'error');
 			$('caiRtn').focus();
 			return;
 		}
 		const desde = Number($('caiDesde').value || 0);
 		const hasta = Number($('caiHasta').value || 0);
 		if (desde < 1 || hasta < desde) {
-			notify('El rango de correlativos no es válido.', 'error');
+			notify('El rango de correlativos no es vÃ¡lido.', 'error');
 			return;
 		}
 		const fechaLimite = $('caiFechaLimite').value;
 		if (!fechaLimite || new Date(fechaLimite) < new Date()) {
-			notify('La fecha límite no puede ser anterior a hoy.', 'error');
+			notify('La fecha lÃ­mite no puede ser anterior a hoy.', 'error');
 			$('caiFechaLimite').focus();
 			return;
 		}
@@ -3033,7 +3033,7 @@
 			p_negocio: String($('caiNegocio').value || 'WS Abarrotes').trim(),
 			p_direccion: String($('caiDireccion').value || '').trim(),
 			p_telefono: String($('caiTelefono').value || '').trim(),
-			p_pie_factura: String($('caiPie').value || '¡Gracias por su compra!').trim(),
+			p_pie_factura: String($('caiPie').value || 'Â¡Gracias por su compra!').trim(),
 			p_activo: $('caiActivo').value === 'true'
 		};
 		const editingId = $('caiId')?.value ? Number($('caiId').value) : null;
@@ -3050,7 +3050,7 @@
 		await renderCaiStatus();
 	}
 
-	/* ── Descargas CSV ──────────────────────────────────────── */
+	/* â”€â”€ Descargas CSV â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 	function downloadCsv(rows, filename) {
 		const csv = '\uFEFF' + rows.map(row => row.map(csvCell).join(',')).join('\r\n');
 		const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -3067,12 +3067,12 @@
 	async function generateMissingBarcodes() {
 		const pending = state.products.filter(product => !isValidBarcode(product.codigo));
 		if (!pending.length) {
-			notify('Todos los productos ya tienen un código de barras válido.');
+			notify('Todos los productos ya tienen un cÃ³digo de barras vÃ¡lido.');
 			return;
 		}
 		const database = await ensureWritable();
 		if (!database) return;
-		notify(`Generando códigos para ${pending.length} producto(s)...`);
+		notify(`Generando cÃ³digos para ${pending.length} producto(s)...`);
 		let generated = 0;
 		for (const product of pending) {
 			const code = generateBarcode();
@@ -3093,10 +3093,10 @@
 			if (!error) generated += 1;
 		}
 		await loadProducts(true);
-		notify(`${generated} código(s) de barras generado(s).`);
+		notify(`${generated} cÃ³digo(s) de barras generado(s).`);
 	}
 
-	/* ── Vendedores ─────────────────────────────────────────── */
+	/* â”€â”€ Vendedores â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 	async function loadSellers(force = false) {
 		if (state.sellersLoaded && !force) return state.sellers;
 		const database = getDb();
@@ -3123,7 +3123,7 @@
 		if (!select || !canPick) return;
 		const current = select.value;
 		select.innerHTML = state.sellers.map(seller => `
-			<option value="${esc(seller.id)}">${esc(seller.username)} · ${esc(roleLabel(seller.role))}</option>
+			<option value="${esc(seller.id)}">${esc(seller.username)} Â· ${esc(roleLabel(seller.role))}</option>
 		`).join('') || '<option value="">Sin vendedores</option>';
 		const me = ws().activeUserName;
 		if (current && state.sellers.some(seller => seller.id === current)) {
@@ -3141,7 +3141,7 @@
 		return select.value || null;
 	}
 
-	/* ── Proveedores ────────────────────────────────────────── */
+	/* â”€â”€ Proveedores â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 	async function loadSuppliers(force = false) {
 		if (state.loadingSuppliers) return state.suppliers;
 		if (state.suppliersLoaded && !force) return state.suppliers;
@@ -3188,15 +3188,15 @@
 		if (count) count.textContent = `${suppliers.length} proveedor${suppliers.length === 1 ? '' : 'es'}`;
 		if (!suppliers.length) {
 			setEmpty(list, state.setupMissing
-				? 'El módulo de proveedores todavía no está activo. Ejecuta "data base pos.sql" en Supabase.'
-				: 'No hay proveedores con esa búsqueda.');
+				? 'El mÃ³dulo de proveedores todavÃ­a no estÃ¡ activo. Ejecuta "data base pos.sql" en Supabase.'
+				: 'No hay proveedores con esa bÃºsqueda.');
 			return;
 		}
 		list.innerHTML = suppliers.map(supplier => `
 			<div class="data-row customer-row">
 				<div class="row-main">
 					<strong>${esc(supplier.nombre)}</strong>
-					<p>RTN ${esc(supplier.rtn || '—')}${supplier.contacto ? ` · ${esc(supplier.contacto)}` : ''}${supplier.telefono ? ` · ${esc(supplier.telefono)}` : ''}</p>
+					<p>RTN ${esc(supplier.rtn || 'â€”')}${supplier.contacto ? ` Â· ${esc(supplier.contacto)}` : ''}${supplier.telefono ? ` Â· ${esc(supplier.telefono)}` : ''}</p>
 				</div>
 				<div class="row-actions">
 					<button class="button small" type="button" data-supplier-use="${supplier.id}">Comprar</button>
@@ -3238,12 +3238,12 @@
 		const name = String($('supplierName').value || '').trim();
 		const rtn = normalizeRtn($('supplierRtn').value);
 		if (!name) {
-			notify('Escribe el nombre o la razón social del proveedor.', 'error');
+			notify('Escribe el nombre o la razÃ³n social del proveedor.', 'error');
 			$('supplierName').focus();
 			return;
 		}
 		if (rtn && rtn.length !== 14) {
-			notify('El RTN debe tener exactamente 14 dígitos.', 'error');
+			notify('El RTN debe tener exactamente 14 dÃ­gitos.', 'error');
 			$('supplierRtn').focus();
 			return;
 		}
@@ -3264,7 +3264,7 @@
 			const message = String(error.message || '').toLowerCase();
 			if (message.includes('could not find the function') || message.includes('schema cache') || isMissingModule(error)) {
 				showSetupBanner();
-				notify('Ejecuta la versión actualizada de "data base pos.sql" para trabajar con proveedores.', 'error');
+				notify('Ejecuta la versiÃ³n actualizada de "data base pos.sql" para trabajar con proveedores.', 'error');
 			} else {
 				notify(error.message || 'No se pudo guardar el proveedor.', 'error');
 			}
@@ -3282,13 +3282,13 @@
 		setView('purchases');
 	}
 
-	/* ── Compras ────────────────────────────────────────────── */
+	/* â”€â”€ Compras â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 	function fillPurchaseSuppliers() {
 		const select = $('purchaseSupplier');
 		if (!select) return;
 		const current = select.value;
-		select.innerHTML = '<option value="">Selecciona el proveedor…</option>' + state.suppliers.map(supplier => `
-			<option value="${supplier.id}">${esc(supplier.nombre)}${supplier.rtn ? ` · RTN ${esc(supplier.rtn)}` : ''}</option>
+		select.innerHTML = '<option value="">Selecciona el proveedorâ€¦</option>' + state.suppliers.map(supplier => `
+			<option value="${supplier.id}">${esc(supplier.nombre)}${supplier.rtn ? ` Â· RTN ${esc(supplier.rtn)}` : ''}</option>
 		`).join('');
 		if (current && state.suppliers.some(supplier => String(supplier.id) === current)) select.value = current;
 	}
@@ -3302,8 +3302,8 @@
 			const related = products.filter(product => Number(product.proveedor_id) === supplierId);
 			if (related.length) products = related;
 		}
-		select.innerHTML = '<option value="">Selecciona el producto…</option>' + products.map(product => `
-			<option value="${product.id}">${esc(product.nombre)} · ${esc(product.categoria || 'General')}</option>
+		select.innerHTML = '<option value="">Selecciona el productoâ€¦</option>' + products.map(product => `
+			<option value="${product.id}">${esc(product.nombre)} Â· ${esc(product.categoria || 'General')}</option>
 		`).join('');
 		if (current && products.some(product => String(product.id) === current)) select.value = current;
 	}
@@ -3406,7 +3406,7 @@
 			<div class="data-row purchase-row">
 				<div class="row-main">
 					<strong>${esc(item.nombre)}</strong>
-					<p>${formatQty(item.cantidad)} × ${money(item.costo_unitario)}</p>
+					<p>${formatQty(item.cantidad)} Ã— ${money(item.costo_unitario)}</p>
 				</div>
 				<div class="row-actions">
 					<span class="sale-total">${money(round2(item.cantidad * item.costo_unitario))}</span>
@@ -3461,14 +3461,14 @@
 			const message = String(error.message || '').toLowerCase();
 			if (message.includes('could not find the function') || message.includes('schema cache') || isMissingModule(error)) {
 				showSetupBanner();
-				notify('Ejecuta la versión actualizada de "data base pos.sql" para registrar compras.', 'error');
+				notify('Ejecuta la versiÃ³n actualizada de "data base pos.sql" para registrar compras.', 'error');
 			} else {
 				notify(error.message || 'No se pudo registrar la compra.', 'error');
 			}
 			return;
 		}
 		const numero = data?.numero_compra ? `#${String(data.numero_compra).padStart(6, '0')}` : '';
-		notify(`Compra ${numero} registrada. El stock ya está actualizado.`);
+		notify(`Compra ${numero} registrada. El stock ya estÃ¡ actualizado.`);
 		state.purchaseItems = [];
 		$('purchaseNote').value = '';
 		state.purchasesLoaded = false;
@@ -3493,18 +3493,18 @@
 		if (count) count.textContent = `${state.purchases.length} compra${state.purchases.length === 1 ? '' : 's'}`;
 		if (!state.purchases.length) {
 			setEmpty(list, state.setupMissing
-				? 'El módulo de compras todavía no está activo. Ejecuta "data base pos.sql" en Supabase.'
-				: 'Todavía no hay compras registradas.');
+				? 'El mÃ³dulo de compras todavÃ­a no estÃ¡ activo. Ejecuta "data base pos.sql" en Supabase.'
+				: 'TodavÃ­a no hay compras registradas.');
 			return;
 		}
 		list.innerHTML = state.purchases.map(purchase => {
 			const details = state.purchaseDetails.filter(detail => Number(detail.compra_id) === Number(purchase.id));
-			const products = details.map(detail => `${esc(detail.nombre)} (${formatQty(detail.cantidad)})`).join(' · ');
+			const products = details.map(detail => `${esc(detail.nombre)} (${formatQty(detail.cantidad)})`).join(' Â· ');
 			return `
 				<div class="data-row purchase-row">
 					<div class="row-main">
-						<strong>Compra #${String(purchase.numero_compra).padStart(6, '0')} · ${esc(purchase.proveedor_nombre)}</strong>
-						<p>${esc(formatDateTime(purchase.fecha))} · ${esc(purchase.usuario_nombre || '—')}${purchase.proveedor_rtn ? ` · RTN ${esc(purchase.proveedor_rtn)}` : ''}</p>
+						<strong>Compra #${String(purchase.numero_compra).padStart(6, '0')} Â· ${esc(purchase.proveedor_nombre)}</strong>
+						<p>${esc(formatDateTime(purchase.fecha))} Â· ${esc(purchase.usuario_nombre || 'â€”')}${purchase.proveedor_rtn ? ` Â· RTN ${esc(purchase.proveedor_rtn)}` : ''}</p>
 						${products ? `<p class="purchase-detail">${products}</p>` : ''}
 					</div>
 					<div class="row-actions">
@@ -3514,7 +3514,7 @@
 		}).join('');
 	}
 
-	/* ── Caja: apertura y cierre ───────────────────────────── */
+	/* â”€â”€ Caja: apertura y cierre â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 	async function loadCash(force = false) {
 		if (state.cashLoaded && !force) return state.cash;
 		const database = getDb();
@@ -3566,7 +3566,7 @@
 		if (title) title.textContent = open ? 'Cierre de caja' : 'Apertura de caja';
 		if (amountLabel) amountLabel.textContent = open ? 'Efectivo declarado (L.)' : 'Monto inicial (L.)';
 		if (submit) submit.textContent = open ? 'Cerrar caja' : 'Abrir caja';
-		if (status) status.textContent = open ? `Abierta · ${formatDate(open.fecha)}` : 'Sin caja abierta';
+		if (status) status.textContent = open ? `Abierta Â· ${formatDate(open.fecha)}` : 'Sin caja abierta';
 		if ($('cashId')) $('cashId').value = open ? String(open.id) : '';
 	}
 	function renderCashSummary() {
@@ -3590,7 +3590,7 @@
 		const bankRows = [...banks.entries()].sort((left, right) => right[1].total - left[1].total);
 		target.innerHTML = `
 			<div class="cash-summary-head">
-				<span>Transacciones del día</span>
+				<span>Transacciones del dÃ­a</span>
 				<strong>${open ? 'Caja abierta' : 'Sin caja abierta'}</strong>
 			</div>
 			<div class="report-row"><div class="report-row-head"><span>Efectivo</span><strong>${money(cash)}</strong></div>
@@ -3598,7 +3598,7 @@
 			<div class="report-row"><div class="report-row-head"><span>Tarjeta (POS)</span><strong>${money(card)}</strong></div>
 				<small>${sales.filter(sale => sale.metodo_pago === 'Tarjeta').length} cobro(s) con tarjeta</small></div>
 			${bankRows.map(([name, data]) => `
-				<div class="report-row report-row-bank"><div class="report-row-head"><span>· ${esc(name)}</span><strong>${money(data.total)}</strong></div>
+				<div class="report-row report-row-bank"><div class="report-row-head"><span>Â· ${esc(name)}</span><strong>${money(data.total)}</strong></div>
 					<small>${data.count} cobro(s)</small></div>`).join('')}
 			<div class="report-row"><div class="report-row-head"><span>Transferencia</span><strong>${money(transfer)}</strong></div>
 				<small>${sales.filter(sale => sale.metodo_pago === 'Transferencia').length} venta(s)</small></div>
@@ -3612,8 +3612,8 @@
 		if (!list) return;
 		if (!state.cash.length) {
 			setEmpty(list, state.setupMissing
-				? 'El módulo de caja todavía no está activo. Ejecuta "data base pos.sql" en Supabase.'
-				: 'Todavía no hay aperturas de caja registradas.');
+				? 'El mÃ³dulo de caja todavÃ­a no estÃ¡ activo. Ejecuta "data base pos.sql" en Supabase.'
+				: 'TodavÃ­a no hay aperturas de caja registradas.');
 			return;
 		}
 		list.innerHTML = state.cash.map(caja => {
@@ -3621,10 +3621,10 @@
 			return `
 				<div class="data-row cash-row">
 					<div class="row-main">
-						<strong>${esc(formatDate(caja.fecha))} · ${esc(caja.usuario_nombre || 'Usuario POS')}</strong>
-						<p>Inicial ${money(caja.monto_inicial)} · Ventas ${money(caja.total_ventas)} · Efectivo ${money(caja.total_efectivo)} · Tarjeta ${money(caja.total_tarjeta || 0)}</p>
-						${caja.estado === 'Cerrada' ? `<p class="purchase-detail">Esperado ${money(caja.monto_sistema)} · Declarado ${money(caja.monto_declarado)} · Diferencia ${money(caja.diferencia)}</p>` : ''}
-						${banks.length ? `<p class="purchase-detail">POS: ${banks.map(([name, data]) => `${esc(name)} ${money(data.total)}`).join(' · ')}</p>` : ''}
+						<strong>${esc(formatDate(caja.fecha))} Â· ${esc(caja.usuario_nombre || 'Usuario POS')}</strong>
+						<p>Inicial ${money(caja.monto_inicial)} Â· Ventas ${money(caja.total_ventas)} Â· Efectivo ${money(caja.total_efectivo)} Â· Tarjeta ${money(caja.total_tarjeta || 0)}</p>
+						${caja.estado === 'Cerrada' ? `<p class="purchase-detail">Esperado ${money(caja.monto_sistema)} Â· Declarado ${money(caja.monto_declarado)} Â· Diferencia ${money(caja.diferencia)}</p>` : ''}
+						${banks.length ? `<p class="purchase-detail">POS: ${banks.map(([name, data]) => `${esc(name)} ${money(data.total)}`).join(' Â· ')}</p>` : ''}
 					</div>
 					<div class="row-actions">
 						<span class="stock-badge ${caja.estado === 'Abierta' ? 'low' : ''}">${esc(caja.estado)}</span>
@@ -3645,7 +3645,7 @@
 		}
 		banner.hidden = false;
 		const text = $('posCashBannerText');
-		if (text) text.textContent = 'No tienes una caja abierta. Abre tu caja para iniciar el día.';
+		if (text) text.textContent = 'No tienes una caja abierta. Abre tu caja para iniciar el dÃ­a.';
 	}
 	async function openCash() {
 		const amount = round2(Number($('cashAmount')?.value || 0));
@@ -3681,7 +3681,7 @@
 			notify(error.message || 'No se pudo cerrar la caja.', 'error');
 			return;
 		}
-		notify('Caja cerrada. El resumen quedó guardado.');
+		notify('Caja cerrada. El resumen quedÃ³ guardado.');
 		$('cashNote').value = '';
 		$('cashAmount').value = '0';
 		state.cashLoaded = false;
@@ -3692,7 +3692,7 @@
 		else await openCash();
 	}
 
-	/* ── Usuarios ───────────────────────────────────────────── */
+	/* â”€â”€ Usuarios â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 	async function loadUsers(force = false) {
 		if (state.usersLoaded && !force) return state.users;
 		const database = getDb();
@@ -3721,14 +3721,14 @@
 		if (!list) return;
 		if (count) count.textContent = `${state.users.length} usuario${state.users.length === 1 ? '' : 's'}`;
 		if (!state.users.length) {
-			setEmpty(list, 'No hay usuarios autorizados. Crea las cuentas en Supabase y agrégalas aquí.');
+			setEmpty(list, 'No hay usuarios autorizados. Crea las cuentas en Supabase y agrÃ©galas aquÃ­.');
 			return;
 		}
 		list.innerHTML = state.users.map(user => `
 			<div class="data-row customer-row">
 				<div class="row-main">
 					<strong>${esc(user.username)}</strong>
-					<p>${esc(roleLabel(user.role))}${user.active ? '' : ' · Inactivo'}</p>
+					<p>${esc(roleLabel(user.role))}${user.active ? '' : ' Â· Inactivo'}</p>
 				</div>
 				<div class="row-actions">
 					<button class="button small" type="button" data-user-edit="${esc(user.username)}">Editar</button>
@@ -3765,65 +3765,8 @@
 		$('userName').focus();
 	}
 
-	/* ── Registro rápido de cliente ─────────────────────────── */
-	function openQuickClient() {
-		const modal = $('quickClientModal');
-		if (modal) modal.hidden = false;
-		$('quickClientName')?.focus();
-	}
-	function closeQuickClient() {
-		const modal = $('quickClientModal');
-		if (modal) modal.hidden = true;
-		['quickClientName', 'quickClientRtn', 'quickClientPhone', 'quickClientEmail', 'quickClientIdentity', 'quickClientAddress'].forEach(id => {
-			const field = $(id);
-			if (field) field.value = '';
-		});
-	}
-	async function saveQuickClient() {
-		const form = $('quickClientForm');
-		if (!form || !form.reportValidity()) return;
-		const name = String($('quickClientName').value || '').trim();
-		const rtn = normalizeRtn($('quickClientRtn').value);
-		if (!name) {
-			notify('Escribe el nombre o la razón social del cliente.', 'error');
-			$('quickClientName').focus();
-			return;
-		}
-		if (rtn && rtn.length !== 14) {
-			notify('El RTN debe tener exactamente 14 dígitos.', 'error');
-			$('quickClientRtn').focus();
-			return;
-		}
-		const database = await ensureWritable();
-		if (!database) return;
-		const { data, error } = await database.rpc('crear_cliente', {
-			p_nombre: name,
-			p_telefono: String($('quickClientPhone').value || '').trim(),
-			p_correo: String($('quickClientEmail').value || '').trim(),
-			p_identidad: String($('quickClientIdentity').value || '').trim(),
-			p_direccion: String($('quickClientAddress').value || '').trim(),
-			p_rtn: rtn
-		});
-		if (error) {
-			const message = String(error.message || '').toLowerCase();
-			if (message.includes('could not find the function') || message.includes('schema cache') || isMissingModule(error)) {
-				showSetupBanner();
-				notify('Ejecuta la versión actualizada de "data base pos.sql" para registrar clientes con RTN.', 'error');
-			} else {
-				notify(error.message || 'No se pudo registrar el cliente.', 'error');
-			}
-			return;
-		}
-		notify(`Cliente ${name} registrado.`);
-		closeQuickClient();
-		state.customersLoaded = false;
-		await loadCustomers(true);
-		const select = $('posCustomer');
-		if (select && data?.id) select.value = String(data.id);
-		updateCustomerTax();
-	}
 
-	/* ── API pública para Recibo.html ───────────────────────── */
+	/* â”€â”€ API pÃºblica para Recibo.html â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 	window.WSApp.renderPOS = renderPOS;
 	window.WSApp.refreshPOS = refreshPOS;
 	window.WSApp.renderProductsView = renderProductsView;
