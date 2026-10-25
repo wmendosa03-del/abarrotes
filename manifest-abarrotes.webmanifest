@@ -1,0 +1,29 @@
+{
+  "name": "WS Abarrotes - Punto de venta",
+  "short_name": "WS Abarrotes",
+  "description": "Punto de venta para abarrotes: catálogo, inventario, ventas, facturas y control de ISV.",
+  "lang": "es-HN",
+  "start_url": "./Abarrotes.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f4f7fb",
+  "theme_color": "#185abd",
+  "categories": ["business", "productivity"],
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Punto de venta",
+      "short_name": "Vender",
+      "url": "./Abarrotes.html",
+      "icons": [{ "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+    }
+  ]
+}

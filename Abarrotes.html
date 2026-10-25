@@ -1,0 +1,1501 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="theme-color" content="#185abd">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-title" content="WS Abarrotes">
+	<link rel="manifest" href="./manifest-abarrotes.webmanifest">
+	<link rel="icon" href="./icon.svg" type="image/svg+xml">
+	<link rel="apple-touch-icon" href="./icon.svg">
+	<title>WS Abarrotes · Punto de venta</title>
+	<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+	<script src="./supabase-config.js"></script>
+	<link rel="stylesheet" href="./abarrotes-base.css">
+	<link rel="stylesheet" href="./pos.css">
+</head>
+<body>
+	<section class="auth-gate" id="authGate" aria-labelledby="authTitle">
+		<div class="auth-logo" aria-hidden="true">WS</div>
+		<h1 id="authTitle">WS Abarrotes</h1>
+		<p id="authDescription">Sistema de punto de venta para abarrotes.</p>
+		<div class="auth-modes" role="group" aria-label="Modo de acceso">
+			<button id="loginModeButton" type="button" aria-pressed="true">Ingresar</button>
+			<button id="signupModeButton" type="button" aria-pressed="false">Crear cuenta</button>
+		</div>
+		<form id="loginForm">
+			<label class="field-label" for="loginUsername">Usuario</label>
+			<input id="loginUsername" type="text" autocomplete="username" placeholder="usuario" minlength="2" maxlength="31" pattern="[A-Za-z0-9][A-Za-z0-9._\-]{1,30}" required>
+			<label class="field-label" for="loginPassword">Contraseña</label>
+			<input id="loginPassword" type="password" autocomplete="current-password" required>
+			<button class="button primary" id="loginButton" type="submit" style="width:100%;min-height:38px;margin-top:4px;">Ingresar</button>
+		</form>
+		<p class="auth-status" id="authStatus" role="status" aria-live="polite"></p>
+	</section>
+
+	<div class="app-window" id="appShell" hidden>
+		<header class="title-bar">
+			<div class="app-mark" aria-hidden="true">WS</div>
+			<div class="app-name">WS Abarrotes</div>
+			<div class="app-spacer"></div>
+			<div class="user-chip">
+				<span class="avatar" id="userAvatar">?</span>
+				<span id="userLabel">—</span>
+				<span class="role" id="userRoleTag">—</span>
+			</div>
+			<button class="button small" id="logoutButton" type="button" title="Cerrar sesión" style="border-color:rgba(255,255,255,.45);background:transparent;color:#fff;">Salir</button>
+		</header>
+
+		<nav class="ribbon-tabs" role="tablist" aria-label="Módulos de WS Abarrotes">
+			<button class="ribbon-tab" type="button" role="tab" aria-selected="false" data-view="dashboard">Inicio</button>
+			<button class="ribbon-tab" type="button" role="tab" aria-selected="true" data-view="pos">Punto de venta</button>
+			<button class="ribbon-tab" type="button" role="tab" aria-selected="false" data-view="sales">Ventas</button>
+			<button class="ribbon-tab" type="button" role="tab" aria-selected="false" data-view="cash">Caja</button>
+			<button class="ribbon-tab" type="button" role="tab" aria-selected="false" data-view="products">Productos</button>
+			<button class="ribbon-tab" type="button" role="tab" aria-selected="false" data-view="inventory">Inventario</button>
+			<button class="ribbon-tab" type="button" role="tab" aria-selected="false" data-view="customers">Clientes</button>
+			<button class="ribbon-tab" type="button" role="tab" aria-selected="false" data-view="suppliers">Proveedores</button>
+			<button class="ribbon-tab" type="button" role="tab" aria-selected="false" data-view="purchases">Compras</button>
+			<button class="ribbon-tab" type="button" role="tab" aria-selected="false" data-view="reports">Reportes</button>
+			<button class="ribbon-tab" type="button" role="tab" aria-selected="false" data-view="users" hidden>Usuarios</button>
+			<button class="ribbon-tab" type="button" role="tab" aria-selected="false" data-view="settings" hidden>Configuración</button>
+		</nav>
+
+		<div class="ribbon" id="ribbon" role="toolbar" aria-label="Acciones del punto de venta">
+			<div class="ribbon-group">
+				<div class="ribbon-group-body">
+					<button class="ribbon-command" type="button" data-action="refresh" title="Recargar los datos del módulo actual">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></svg>
+						Recargar
+					</button>
+					<button class="ribbon-command" type="button" data-action="logout" title="Cerrar la sesión actual">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 8 6 12l4 4M6 12h9"/></svg>
+						Salir
+					</button>
+
+				</div>
+				<div class="ribbon-group-title">Sesión</div>
+			</div>
+
+			<div class="ribbon-group" data-ribbon="pos">
+				<div class="ribbon-group-body">
+					<button class="ribbon-command" type="button" data-pos-action="clear" title="Vaciar el carrito e iniciar otra venta">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/><path d="M10 11v5M14 11v5"/></svg>
+						Nueva venta
+					</button>
+					<button class="ribbon-command primary" type="button" data-pos-action="charge" title="Registrar la venta y abrir el ticket">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg>
+						Cobrar
+					</button>
+					<button class="ribbon-command" type="button" data-pos-action="search" title="Buscar un producto o enfocar el lector de código de barras (F2)">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>
+						Buscar
+					</button>
+				</div>
+				<div class="ribbon-group-title">Venta</div>
+			</div>
+			<div class="ribbon-group" data-ribbon="pos">
+				<div class="ribbon-group-body">
+					<button class="ribbon-command" type="button" data-pos-action="go-products" title="Administrar el catálogo y el inventario">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 7h16l-1.5 13H5.5z"/><path d="M8 7V5a4 4 0 0 1 8 0v2"/></svg>
+						Productos
+					</button>
+					<button class="ribbon-command" type="button" data-pos-action="go-sales" title="Consultar las ventas y los tickets emitidos">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/><path d="M17 15h4M19 13v4"/></svg>
+						Ventas del día
+					</button>
+				</div>
+				<div class="ribbon-group-title">Ir a</div>
+			</div>
+
+			<div class="ribbon-group" data-ribbon="pos">
+				<div class="ribbon-group-body">
+					<button class="ribbon-command" type="button" data-pos-action="new-client" title="Registrar un cliente con RTN sin salir del punto de venta">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5.5 6-5.5 1.2 0 2.3.3 3.2.8"/><path d="M18 12v6M15 15h6"/></svg>
+						Registrar cliente
+					</button>
+					<button class="ribbon-command" type="button" data-pos-action="go-cash" title="Apertura y cierre de caja del día">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M8 15h4"/></svg>
+						Abrir caja
+					</button>
+					<button class="ribbon-command" type="button" data-pos-action="go-purchases" title="Registrar facturas de compra con proveedores">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M3 7h18v12H3z"/><path d="M3 11h18M8 15h3"/></svg>
+						Compras
+					</button>
+				</div>
+				<div class="ribbon-group-title">Registrar</div>
+			</div>
+
+			<div class="ribbon-group" data-ribbon="cash" hidden>
+				<div class="ribbon-group-body">
+					<button class="ribbon-command primary" type="button" data-pos-action="cash-open" title="Abrir la caja del día con el monto inicial">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 4h16v16H4z"/><path d="M4 10h16"/><path d="M15 15h2"/></svg>
+						Abrir caja
+					</button>
+					<button class="ribbon-command" type="button" data-pos-action="cash-close" title="Cerrar la caja con el monto declarado">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M8 15h8"/></svg>
+						Cerrar caja
+					</button>
+					<button class="ribbon-command" type="button" data-pos-action="refresh-cash" title="Actualizar el estado de la caja">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></svg>
+						Actualizar
+					</button>
+					<button class="ribbon-command" type="button" data-pos-action="go-pos" title="Ir al punto de venta">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg>
+						Vender
+					</button>
+				</div>
+				<div class="ribbon-group-title">Caja</div>
+			</div>
+
+			<div class="ribbon-group" data-ribbon="suppliers" hidden>
+				<div class="ribbon-group-body">
+					<button class="ribbon-command" type="button" data-pos-action="new-supplier" title="Limpiar el formulario para un proveedor nuevo">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 8v8M8 12h8"/></svg>
+						Nuevo proveedor
+					</button>
+					<button class="ribbon-command primary" type="button" data-pos-action="save-supplier" title="Guardar el proveedor del formulario">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 4h13l3 3v13H4z"/><path d="M8 4v6h7V4M8 20v-6h8v6"/></svg>
+						Guardar
+					</button>
+					<button class="ribbon-command" type="button" data-pos-action="go-purchases" title="Registrar una factura de compra">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M3 7h18v12H3z"/><path d="M3 11h18M8 15h3"/></svg>
+						Registrar compra
+					</button>
+				</div>
+				<div class="ribbon-group-title">Proveedores</div>
+			</div>
+
+			<div class="ribbon-group" data-ribbon="purchases" hidden>
+				<div class="ribbon-group-body">
+					<button class="ribbon-command" type="button" data-pos-action="add-purchase-item" title="Agregar un producto del catálogo a la factura de compra">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 8v8M8 12h8"/></svg>
+						Agregar producto
+					</button>
+					<button class="ribbon-command primary" type="button" data-pos-action="save-purchase" title="Registrar la factura de compra y actualizar el stock">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 4h13l3 3v13H4z"/><path d="M8 4v6h7V4M8 20v-6h8v6"/></svg>
+						Registrar compra
+					</button>
+					<button class="ribbon-command" type="button" data-pos-action="clear-purchase" title="Vaciar la factura de compra en curso">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>
+						Vaciar
+					</button>
+					<button class="ribbon-command" type="button" data-pos-action="go-suppliers" title="Administrar los proveedores">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M3 21h18M5 21V8l7-5 7 5v13"/><path d="M9 21v-6h6v6"/></svg>
+						Proveedores
+					</button>
+				</div>
+				<div class="ribbon-group-title">Compras</div>
+			</div>
+
+			<div class="ribbon-group" data-ribbon="users" hidden>
+				<div class="ribbon-group-body">
+					<button class="ribbon-command primary" type="button" data-pos-action="save-user" title="Guardar el usuario con su rol">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 4h13l3 3v13H4z"/><path d="M8 4v6h7V4M8 20v-6h8v6"/></svg>
+						Guardar
+					</button>
+					<button class="ribbon-command" type="button" data-pos-action="refresh-users" title="Actualizar la lista de usuarios">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></svg>
+						Actualizar
+					</button>
+				</div>
+				<div class="ribbon-group-title">Usuarios</div>
+			</div>
+
+			<div class="ribbon-group" data-ribbon="products" hidden>
+				<div class="ribbon-group-body">
+					<button class="ribbon-command" type="button" data-pos-action="new-product" title="Limpiar el formulario para agregar un producto nuevo">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 8v8M8 12h8"/></svg>
+						Nuevo producto
+					</button>
+					<button class="ribbon-command primary" type="button" data-pos-action="save-product" title="Guardar el producto del formulario">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 4h13l3 3v13H4z"/><path d="M8 4v6h7V4M8 20v-6h8v6"/></svg>
+						Guardar
+					</button>
+					<button class="ribbon-command" type="button" data-pos-action="search-product" title="Buscar dentro del inventario">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>
+						Buscar
+					</button>
+				</div>
+				<div class="ribbon-group-title">Producto</div>
+			</div>
+			<div class="ribbon-group" data-ribbon="products" hidden>
+				<div class="ribbon-group-body">
+					<button class="ribbon-command" type="button" data-pos-action="low-stock" title="Mostrar solo los productos con stock bajo o agotado">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M12 3 2.5 20h19z"/><path d="M12 9v5M12 17h.01"/></svg>
+						Stock bajo
+					</button>
+					<button class="ribbon-command" type="button" data-pos-action="export-products" title="Descargar el inventario en un archivo CSV para Excel">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 17v4h14v-4"/></svg>
+						Exportar CSV
+					</button>
+					<button class="ribbon-command" type="button" data-pos-action="print-labels" title="Imprimir las etiquetas de los productos filtrados para pegarlas en el producto">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M6 9V4h12v5M6 18H4v-6h16v6h-2M8 14h8v6H8z"/></svg>
+						Etiquetas
+					</button>
+					<button class="ribbon-command" type="button" data-pos-action="generate-barcodes" title="Generar un código de barras EAN-13 a los productos que no lo tienen">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 5v14M7 5v14M11 5v10M14 5v14M18 5v10"/></svg>
+						Generar códigos
+					</button>
+				</div>
+				<div class="ribbon-group-title">Inventario</div>
+			</div>
+
+			<div class="ribbon-group" data-ribbon="sales" hidden>
+				<div class="ribbon-group-body">
+					<button class="ribbon-command" type="button" data-pos-action="today" title="Mostrar las ventas de hoy">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>
+						Hoy
+					</button>
+					<button class="ribbon-command" type="button" data-pos-action="filter-sales" title="Aplicar el rango de fechas y la búsqueda">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 5h16l-6 7v6l-4 2v-8z"/></svg>
+						Filtrar
+					</button>
+					<button class="ribbon-command" type="button" data-pos-action="clear-sales" title="Quitar filtros y mostrar el historial reciente">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+						Limpiar
+					</button>
+				</div>
+				<div class="ribbon-group-title">Consultar ventas</div>
+			</div>
+
+			<div class="ribbon-group" data-ribbon="dashboard" hidden>
+				<div class="ribbon-group-body">
+					<button class="ribbon-command" type="button" data-pos-action="refresh-dashboard" title="Actualizar el resumen del negocio">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></svg>
+						Actualizar
+					</button>
+					<button class="ribbon-command primary" type="button" data-pos-action="go-pos" title="Ir al punto de venta">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg>
+						Vender
+					</button>
+					<button class="ribbon-command" type="button" data-pos-action="go-reports" title="Abrir reportes">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>
+						Reportes
+					</button>
+					<button class="ribbon-command" type="button" data-pos-action="go-settings" title="Abrir la configuración del negocio">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21h-4v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H3v-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.6V3h4v.1a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.1v4H21a1.7 1.7 0 0 0-1.6 1z"/></svg>
+						Configuración
+					</button>
+				</div>
+				<div class="ribbon-group-title">Inicio</div>
+			</div>
+
+			<div class="ribbon-group" data-ribbon="inventory" hidden>
+				<div class="ribbon-group-body">
+					<button class="ribbon-command" type="button" data-pos-action="refresh-inventory" title="Actualizar existencias y movimientos">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></svg>
+						Actualizar
+					</button>
+					<button class="ribbon-command" type="button" data-pos-action="inventory-low" title="Mostrar productos con stock bajo">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M12 3 2.5 20h19z"/><path d="M12 9v5M12 17h.01"/></svg>
+						Stock bajo
+					</button>
+					<button class="ribbon-command" type="button" data-pos-action="go-products" title="Ir al catálogo para ajustar productos">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 7h16l-1.5 13H5.5z"/><path d="M8 7V5a4 4 0 0 1 8 0v2"/></svg>
+						Productos
+					</button>
+					<button class="ribbon-command" type="button" data-pos-action="export-inventory" title="Descargar los movimientos de inventario en CSV">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 17v4h14v-4"/></svg>
+						Exportar
+					</button>
+					<button class="ribbon-command" type="button" data-pos-action="print-labels-inventory" title="Imprimir las etiquetas de los productos del inventario">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M6 9V4h12v5M6 18H4v-6h16v6h-2M8 14h8v6H8z"/></svg>
+						Etiquetas
+					</button>
+				</div>
+				<div class="ribbon-group-title">Inventario</div>
+			</div>
+
+			<div class="ribbon-group" data-ribbon="customers" hidden>
+				<div class="ribbon-group-body">
+					<button class="ribbon-command" type="button" data-pos-action="new-customer" title="Limpiar el formulario para un cliente nuevo">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 8v8M8 12h8"/></svg>
+						Nuevo cliente
+					</button>
+					<button class="ribbon-command primary" type="button" data-pos-action="save-customer" title="Guardar el cliente del formulario">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 4h13l3 3v13H4z"/><path d="M8 4v6h7V4M8 20v-6h8v6"/></svg>
+						Guardar
+					</button>
+					<button class="ribbon-command" type="button" data-pos-action="search-customer" title="Buscar clientes">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>
+						Buscar
+					</button>
+				</div>
+				<div class="ribbon-group-title">Clientes</div>
+			</div>
+
+			<div class="ribbon-group" data-ribbon="reports" hidden>
+				<div class="ribbon-group-body">
+					<button class="ribbon-command" type="button" data-pos-action="report-today" title="Reporte de hoy">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>
+						Hoy
+					</button>
+					<button class="ribbon-command" type="button" data-pos-action="report-month" title="Reporte del mes actual">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18M7 14h3M14 14h3M7 18h3"/></svg>
+						Este mes
+					</button>
+					<button class="ribbon-command primary" type="button" data-pos-action="apply-reports" title="Aplicar el rango de fechas">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 5h16l-6 7v6l-4 2v-8z"/></svg>
+						Aplicar
+					</button>
+					<button class="ribbon-command" type="button" data-pos-action="export-report" title="Descargar el reporte en CSV">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 17v4h14v-4"/></svg>
+						Exportar CSV
+					</button>
+				</div>
+				<div class="ribbon-group-title">Reportes</div>
+			</div>
+
+			<div class="ribbon-group" data-ribbon="settings" hidden>
+				<div class="ribbon-group-body">
+					<button class="ribbon-command primary" type="button" data-pos-action="save-settings" title="Guardar la configuración del negocio">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 4h13l3 3v13H4z"/><path d="M8 4v6h7V4M8 20v-6h8v6"/></svg>
+						Guardar
+					</button>
+					<button class="ribbon-command" type="button" data-pos-action="reset-settings" title="Restaurar la configuración predeterminada">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></svg>
+						Restaurar
+					</button>
+				</div>
+				<div class="ribbon-group-title">Configuración</div>
+			</div>
+		</div>
+
+		<main class="workspace">
+			<div class="pos-setup-banner" id="posSetupBanner" hidden>
+				<div>
+					<strong>Falta activar el punto de venta</strong>
+					Ejecuta el archivo <code>data base pos.sql</code> en Supabase → SQL Editor y luego recarga esta página.
+				</div>
+			</div>
+
+			<section class="panel pos-panel" id="posView" data-panel="pos" hidden>
+				<div class="panel-head">
+					<div>
+						<h2>Punto de venta</h2>
+						<p>Escanea o busca productos, arma la venta y cobra en segundos.</p>
+					</div>
+					<div class="pos-head-summary" id="posTodaySummary"></div>
+				</div>
+				<div class="pos-layout">
+					<section class="card pos-catalog" aria-labelledby="posCatalogTitle">
+						<h3 id="posCatalogTitle">Catálogo de productos</h3>
+						<div class="pos-search-row">
+							<div class="pos-search-box">
+								<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>
+								<input id="posSearch" type="search" autocomplete="off" placeholder="Buscar por nombre, categoría o escanear código...">
+							</div>
+							<button class="button pos-scan-button" id="posScanButton" type="button" title="Enfocar la búsqueda para escanear">
+								<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 7V4h3M17 4h3v3M20 17v3h-3M7 20H4v-3"/><path d="M7 8v8M10 8v8M13 8v8M17 8v8"/></svg>
+							</button>
+						</div>
+						<div class="pos-categories" id="posCategories" aria-label="Categorías de productos"></div>
+						<div class="pos-grid" id="posGrid" aria-live="polite"></div>
+					</section>
+
+					<aside class="card pos-cart" aria-labelledby="posCartTitle">
+						<div class="pos-cart-head">
+							<h3 id="posCartTitle">Venta actual <span class="cart-count" id="posCartCount">0 artículos</span></h3>
+							<button class="button" id="posClearCart" type="button">Vaciar</button>
+						</div>
+						<div class="pos-cart-customer">
+							<div class="pos-customer-head">
+								<label for="posCustomer">Cliente</label>
+							</div>
+							<select id="posCustomer">
+								<option value="">Consumidor Final</option>
+							</select>
+							<div class="pos-customer-free" id="posCustomerNameRow" hidden>
+								<label for="posCustomerName">Nombre en el recibo</label>
+								<input id="posCustomerName" maxlength="120" placeholder="Consumidor Final">
+								<p class="field-hint">Se imprime en el recibo. Déjalo vacío para usar "Consumidor Final".</p>
+							</div>
+							<p class="pos-customer-tax" id="posCustomerTax">RTN: —</p>
+							<div class="pos-customer-actions">
+								<button class="button small" type="button" id="posNewClient" title="Registrar un cliente con RTN sin salir del punto de venta">Registrar cliente</button>
+								<button class="button small" type="button" id="posEditClient" hidden title="Editar los datos del cliente seleccionado">Editar cliente</button>
+							</div>
+							<div class="pos-rtn-edit" id="posRtnEdit" hidden>
+								<input id="posRtnInput" inputmode="numeric" maxlength="20" placeholder="14 dígitos">
+								<button class="button small primary" type="button" id="posRtnSave">Guardar</button>
+								<button class="button small" type="button" id="posRtnCancel">Cancelar</button>
+							</div>
+						</div>
+						<div class="pos-document-row">
+							<span class="pos-payment-label">Documento</span>
+							<div class="pos-doc-toggle" id="posDocumentType" role="group" aria-label="Tipo de documento">
+								<button class="active" type="button" data-doc-type="Factura">Factura</button>
+								<button type="button" data-doc-type="Recibo">Recibo</button>
+							</div>
+							<p class="pos-document-hint" id="posDocumentHint">La factura requiere un cliente registrado con RTN.</p>
+						</div>
+						<div class="pos-seller-row" id="posSellerRow" hidden>
+							<label for="posSeller">Vendedor de la venta</label>
+							<select id="posSeller"></select>
+						</div>
+						<div class="pos-cash-banner" id="posCashBanner" hidden>
+							<span id="posCashBannerText">No hay apertura de caja para hoy.</span>
+							<button class="button small" type="button" data-pos-action="go-cash">Abrir caja</button>
+						</div>
+						<div class="pos-cart-items" id="posCartItems" aria-live="polite"></div>
+						<div class="pos-totals">
+							<div class="pos-total-row"><span>Subtotal (con ISV)</span><strong id="posSubtotal">L. 0.00</strong></div>
+							<div class="pos-total-row discount">
+								<label for="posDiscount">Descuento (L.)</label>
+								<input id="posDiscount" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00">
+							</div>
+							<div class="pos-total-row grand"><span>Total</span><strong id="posTotal">L. 0.00</strong></div>
+							<div class="pos-tax-note">
+								Base gravable: <strong id="posTaxBase">L. 0.00</strong><br>
+								<span id="posTaxRate">ISV 15% incluido</span>: <strong id="posTaxIncluded">L. 0.00</strong>
+							</div>
+						</div>
+						<div class="pos-payment">
+							<span class="pos-payment-label">Método de pago</span>
+							<div class="pos-payment-methods" id="posPaymentMethods">
+								<button class="pos-payment-method active" type="button" data-pos-payment="Efectivo">Efectivo</button>
+								<button class="pos-payment-method" type="button" data-pos-payment="Tarjeta">Tarjeta</button>
+								<button class="pos-payment-method" type="button" data-pos-payment="Transferencia">Transferencia</button>
+							</div>
+							<div class="pos-bank-row" id="posBankRow" hidden>
+								<label for="posCardBank">Banco / terminal POS
+									<select id="posCardBank">
+										<option value="">Selecciona el banco…</option>
+										<option value="BAC Credomatic">BAC Credomatic</option>
+										<option value="Banco Atlántida">Banco Atlántida</option>
+										<option value="Banco Nacional de Honduras">Banco Nacional de Honduras</option>
+										<option value="Banhame">Banhame</option>
+										<option value="Banpvivir">Banpvivir</option>
+										<option value="Otro punto de venta">Otro punto de venta</option>
+									</select>
+								</label>
+								<p class="field-hint" id="posBankHint">El cobro con tarjeta se agrupa por banco en el cierre de caja.</p>
+							</div>
+							<div class="pos-cash-row" id="posCashRow">
+								<label for="posCashReceived">Efectivo recibido
+									<input id="posCashReceived" type="text" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" placeholder="0.00">
+								</label>
+								<div class="pos-change" id="posChangeBox">
+									<span>Cambio</span>
+									<strong id="posChange">L. 0.00</strong>
+								</div>
+							</div>
+						</div>
+						<div class="pos-cart-note">
+							<label for="posNote">Nota de la venta</label>
+							<input id="posNote" type="text" maxlength="300" placeholder="Opcional">
+						</div>
+						<button class="button primary pos-charge-button" id="posChargeButton" type="button" disabled>Cobrar venta</button>
+						<p class="pos-hint">F2 buscar · F4 cobrar · Enter agrega el código escaneado</p>
+					</aside>
+				</div>
+			</section>
+
+			<section class="panel narrow" id="productsView" data-panel="products" hidden>
+				<div class="panel-head">
+					<div>
+						<h2>Productos e inventario</h2>
+						<p>Administra precios con ISV incluido, costos, existencias y alertas de stock bajo.</p>
+					</div>
+					<span class="status-pill" id="productCount">0 productos</span>
+				</div>
+				<div class="inventory-layout">
+					<section class="card">
+						<h3 id="productFormTitle">Nuevo producto</h3>
+						<form id="productForm">
+							<input id="productId" type="hidden">
+							<div class="form-grid product-form-grid">
+								<div class="field full">
+									<label>Foto del producto</label>
+									<div class="photo-picker">
+										<div class="photo-preview" id="productPhotoPreview">
+											<img id="productPhotoImage" alt="Foto del producto" hidden>
+											<span id="productPhotoEmpty">Sin foto</span>
+										</div>
+										<div class="photo-actions">
+											<input id="productPhoto" type="file" accept="image/png,image/jpeg,image/jpg,image/webp" hidden>
+											<label class="button small" for="productPhoto" id="productPhotoPick">Elegir imagen</label>
+											<button class="button small" type="button" id="productPhotoClear" hidden>Quitar foto</button>
+											<p class="field-hint" id="productPhotoHint">JPG o PNG. La imagen se reduce a 800 px antes de subirla.</p>
+										</div>
+									</div>
+								</div>
+								<div class="field">
+									<label for="productCode">Código / código de barras</label>
+									<div class="code-row">
+										<input id="productCode" maxlength="80" placeholder="Opcional">
+										<button class="button small" type="button" id="productCodeGenerate" title="Generar un código de barras EAN-13">Generar</button>
+									</div>
+									<div class="barcode-preview" id="productBarcodePreview"></div>
+									<p class="field-hint">Si lo dejas vacío se genera un EAN-13 automáticamente.</p>
+								</div>
+								<div class="field">
+									<label for="productName">Nombre del producto</label>
+									<input id="productName" maxlength="160" required>
+								</div>
+								<div class="field">
+									<label for="productCategory">Categoría</label>
+									<input id="productCategory" list="productCategoryOptions" maxlength="80" value="General">
+								</div>
+								<div class="field">
+									<label for="productUnit">Unidad de venta</label>
+									<select id="productUnit">
+										<option>Unidad</option>
+										<option>Libra</option>
+										<option>Kilogramo</option>
+										<option>Litro</option>
+										<option>Mililitro</option>
+										<option>Caja</option>
+										<option>Paquete</option>
+										<option>Docena</option>
+										<option>Servicio</option>
+									</select>
+								</div>
+								<div class="field">
+									<label for="productPrice">Precio de venta con ISV (L.)</label>
+									<input id="productPrice" type="number" min="0" step="1" inputmode="numeric" value="0" required>
+									<p class="field-hint">Precio final del producto: número entero, sin decimales.</p>
+									<p class="field-hint">Este es el precio final que paga el cliente.</p>
+								</div>
+								<div class="field">
+									<label for="productCost">Costo de compra (L.)</label>
+									<input id="productCost" type="number" min="0" step="1" inputmode="numeric" value="0">
+									<p class="field-hint">Costo final del proveedor: número entero.</p>
+									<p class="field-hint">Costo final pagado al proveedor.</p>
+								</div>
+								<div class="field">
+									<label for="productTax">ISV (%)</label>
+									<input id="productTax" type="number" min="0" max="100" step="0.01" inputmode="decimal" value="15">
+									<p class="field-hint">15% por defecto. Usa 0 solo para productos exentos.</p>
+								</div>
+								<div class="field">
+									<label for="productStock">Stock actual</label>
+									<input id="productStock" type="number" min="0" step="0.001" inputmode="decimal" value="0">
+								</div>
+								<div class="field">
+									<label for="productMinStock">Stock mínimo</label>
+									<input id="productMinStock" type="number" min="0" step="0.001" inputmode="decimal" value="0">
+								</div>
+								<div class="field full checkbox-field">
+									<input id="productActive" type="checkbox" checked>
+									<label for="productActive">Producto activo para la venta</label>
+								</div>
+							</div>
+							<div class="form-actions">
+								<button class="button primary grow" type="submit">Guardar producto</button>
+								<button class="button" id="cancelProductEdit" type="button" hidden>Cancelar edición</button>
+							</div>
+						</form>
+						<datalist id="productCategoryOptions"></datalist>
+					</section>
+					<section class="card">
+						<h3>Inventario</h3>
+						<div class="list-toolbar">
+							<label>Buscar
+								<input id="productSearch" type="search" placeholder="Nombre, código o categoría">
+							</label>
+							<label>Filtro
+								<select id="productFilter">
+									<option value="all">Todos</option>
+									<option value="low">Stock bajo</option>
+									<option value="inactive">Inactivos</option>
+								</select>
+							</label>
+							<span class="spacer"></span>
+							<span class="status-pill">Inventario</span>
+						</div>
+						<div class="data-list scroll inventory-list" id="productList" aria-live="polite"></div>
+					</section>
+				</div>
+			</section>
+
+			<section class="panel narrow" id="salesView" data-panel="sales" hidden>
+				<div class="panel-head">
+					<div>
+						<h2>Ventas y facturas</h2>
+						<p>Consulta el historial, reimprime facturas y anula ventas con devolución de stock.</p>
+					</div>
+					<span class="status-pill" id="salesCount">0 ventas</span>
+				</div>
+				<section class="card">
+					<div class="list-toolbar">
+						<label>Desde <input id="salesFrom" type="date"></label>
+						<label>Hasta <input id="salesTo" type="date"></label>
+						<label>Buscar <input id="salesSearch" type="search" placeholder="# venta, cliente, RTN, pago..."></label>
+						<button class="button" id="filterSales" type="button">Filtrar</button>
+						<button class="button" id="clearSalesFilter" type="button">Limpiar</button>
+					</div>
+					<div class="sales-summary" id="salesSummary"></div>
+					<div class="data-list scroll sales-list" id="salesList" aria-live="polite"></div>
+				</section>
+			</section>
+
+			<section class="panel narrow" id="dashboardView" data-panel="dashboard" hidden>
+				<div class="panel-head">
+					<div>
+						<h2>Inicio</h2>
+						<p>Resumen del negocio, ventas recientes y productos que necesitan reposición.</p>
+					</div>
+					<span class="status-pill" id="dashboardDate"></span>
+				</div>
+				<div class="dashboard-metrics" id="dashboardMetrics"></div>
+				<div class="dashboard-tax" id="dashboardTax"></div>
+				<div class="dashboard-columns">
+					<section class="card">
+						<h3>Últimas ventas</h3>
+						<div class="data-list dashboard-list" id="dashboardRecentSales" aria-live="polite"></div>
+					</section>
+					<section class="card">
+						<h3>Stock bajo</h3>
+						<div class="data-list dashboard-list" id="dashboardLowStock" aria-live="polite"></div>
+					</section>
+					<section class="card">
+						<h3>Cajas y equipo</h3>
+						<div class="data-list dashboard-list" id="dashboardCash" aria-live="polite"></div>
+					</section>
+				</div>
+			</section>
+
+			<section class="panel narrow" id="inventoryView" data-panel="inventory" hidden>
+				<div class="panel-head">
+					<div>
+						<h2>Inventario</h2>
+						<p>Controla existencias, valor del inventario y todos los movimientos de entrada, venta y ajuste.</p>
+					</div>
+					<span class="status-pill" id="inventoryCount">0 movimientos</span>
+				</div>
+				<div class="sales-summary" id="inventoryMetrics"></div>
+				<section class="card">
+					<div class="list-toolbar">
+						<label>Buscar <input id="inventorySearch" type="search" placeholder="Producto, referencia o nota"></label>
+						<label>Movimiento
+							<select id="inventoryType">
+								<option value="all">Todos</option>
+								<option value="Entrada">Entrada</option>
+								<option value="Venta">Venta</option>
+								<option value="Ajuste">Ajuste</option>
+								<option value="Anulacion">Anulación</option>
+								<option value="Salida">Salida</option>
+							</select>
+						</label>
+						<button class="button" id="refreshInventory" type="button">Actualizar</button>
+						<button class="button" id="exportInventory" type="button">Exportar CSV</button>
+					</div>
+					<div class="data-list scroll inventory-movements" id="inventoryMovements" aria-live="polite"></div>
+				</section>
+			</section>
+
+			<section class="panel narrow" id="customersView" data-panel="customers" hidden>
+				<div class="panel-head">
+					<div>
+						<h2>Clientes</h2>
+						<p>Registra clientes con RTN para emitir facturas comerciales y consulta su historial de contacto.</p>
+					</div>
+					<span class="status-pill" id="customerCount">0 clientes</span>
+				</div>
+				<div class="inventory-layout">
+					<section class="card">
+						<h3 id="customerFormTitle">Nuevo cliente</h3>
+						<form id="customerForm">
+							<input id="customerId" type="hidden">
+							<div class="form-grid product-form-grid">
+								<div class="field">
+									<label for="customerName">Nombre o razón social</label>
+									<input id="customerName" maxlength="160" required>
+								</div>
+								<div class="field">
+									<label for="customerRtn">RTN</label>
+									<input id="customerRtn" inputmode="numeric" maxlength="20" placeholder="14 dígitos">
+									<p class="field-hint">Obligatorio para factura comercial.</p>
+								</div>
+								<div class="field">
+									<label for="customerPhone">Teléfono</label>
+									<input id="customerPhone" maxlength="30">
+								</div>
+								<div class="field">
+									<label for="customerEmail">Correo</label>
+									<input id="customerEmail" type="email" maxlength="120">
+								</div>
+								<div class="field">
+									<label for="customerIdentity">Identidad</label>
+									<input id="customerIdentity" maxlength="30">
+								</div>
+								<div class="field full">
+									<label for="customerAddress">Dirección</label>
+									<input id="customerAddress" maxlength="240">
+								</div>
+							</div>
+							<div class="form-actions">
+								<button class="button primary grow" type="submit">Guardar cliente</button>
+								<button class="button" id="cancelCustomerEdit" type="button" hidden>Cancelar edición</button>
+							</div>
+						</form>
+					</section>
+					<section class="card">
+						<h3>Directorio</h3>
+						<div class="list-toolbar">
+							<label>Buscar <input id="customerSearch" type="search" placeholder="Nombre, RTN, teléfono..."></label>
+							<span class="spacer"></span>
+							<span class="status-pill">Clientes</span>
+						</div>
+						<div class="data-list scroll customer-list" id="customerList" aria-live="polite"></div>
+					</section>
+				</div>
+			</section>
+
+			<section class="panel narrow" id="reportsView" data-panel="reports" hidden>
+				<div class="panel-head">
+					<div>
+						<h2>Reportes</h2>
+						<p>Ventas, ISV, métodos de pago y productos más vendidos por período.</p>
+					</div>
+					<span class="status-pill" id="reportsRangeLabel">—</span>
+				</div>
+				<section class="card">
+					<div class="list-toolbar">
+						<label>Desde <input id="reportsFrom" type="date"></label>
+						<label>Hasta <input id="reportsTo" type="date"></label>
+						<button class="button" id="applyReports" type="button">Aplicar</button>
+						<button class="button" id="reportsToday" type="button">Hoy</button>
+						<button class="button" id="reportsMonth" type="button">Este mes</button>
+						<button class="button" id="exportReport" type="button">Exportar CSV</button>
+					</div>
+					<div class="sales-summary" id="reportsMetrics"></div>
+					<div class="reports-grid">
+						<section class="report-card">
+							<h3>Por método de pago</h3>
+							<div id="reportsPayments"></div>
+						</section>
+						<section class="report-card">
+							<h3>Productos más vendidos</h3>
+							<div id="reportsTopProducts"></div>
+						</section>
+						<section class="report-card">
+							<h3>Resumen de ISV</h3>
+							<div id="reportsTax"></div>
+						</section>
+					</div>
+				</section>
+			</section>
+
+			<section class="panel narrow" id="settingsView" data-panel="settings" hidden>
+				<div class="panel-head">
+					<div>
+						<h2>Configuración</h2>
+						<p>Datos del negocio que aparecen en la factura, ISV predeterminado y preferencias del punto de venta.</p>
+					</div>
+					<span class="status-pill">Facturación</span>
+				</div>
+				<div class="inventory-layout">
+					<section class="card">
+						<h3>Datos del negocio</h3>
+						<form id="settingsForm">
+							<div class="form-grid product-form-grid">
+								<div class="field full">
+									<label for="settingsBusinessName">Nombre del negocio</label>
+									<input id="settingsBusinessName" maxlength="120">
+								</div>
+								<div class="field">
+									<label for="settingsRtn">RTN del negocio</label>
+									<input id="settingsRtn" inputmode="numeric" maxlength="20" placeholder="14 dígitos">
+								</div>
+								<div class="field">
+									<label for="settingsPhone">Teléfono</label>
+									<input id="settingsPhone" maxlength="30">
+								</div>
+								<div class="field full">
+									<label for="settingsAddress">Dirección</label>
+									<input id="settingsAddress" maxlength="240">
+								</div>
+								<div class="field full">
+									<label for="settingsEmail">Correo</label>
+									<input id="settingsEmail" type="email" maxlength="120">
+								</div>
+								<div class="field full">
+									<label for="settingsFooter">Mensaje al pie de la factura</label>
+									<input id="settingsFooter" maxlength="180">
+								</div>
+								<div class="field">
+									<label for="settingsTax">ISV predeterminado (%)</label>
+									<input id="settingsTax" type="number" min="0" max="100" step="0.01" value="15">
+								</div>
+								<div class="field">
+									<label for="settingsStockMin">Stock mínimo predeterminado</label>
+									<input id="settingsStockMin" type="number" min="0" step="0.001" value="5">
+								</div>
+								<div class="field">
+									<label for="settingsCurrency">Símbolo de moneda</label>
+									<input id="settingsCurrency" maxlength="8" value="L.">
+								</div>
+
+							</div>
+							<div class="form-actions">
+								<button class="button primary grow" type="submit">Guardar configuración</button>
+								<button class="button" id="resetSettings" type="button">Restaurar</button>
+							</div>
+						</form>
+					</section>
+					<section class="card">
+						<h3>CAI · Código de Autorización de Impresión (SAR)</h3>
+						<form id="caiForm">
+							<input id="caiId" type="hidden">
+							<div class="form-grid product-form-grid">
+								<div class="field full">
+									<label for="caiCai">CAI (36 caracteres)</label>
+									<input id="caiCai" maxlength="40" placeholder="XXXXXX-XXXX-XXXX-XXXX-XXXX-XXXX" required>
+								</div>
+								<div class="field">
+									<label for="caiRtn">RTN del emisor</label>
+									<input id="caiRtn" inputmode="numeric" maxlength="20" placeholder="14 dígitos" required>
+								</div>
+								<div class="field">
+									<label for="caiTipo">Tipo de documento</label>
+									<select id="caiTipo">
+										<option value="01">01 · Factura Comercial</option>
+										<option value="02">02 · Recibo</option>
+									</select>
+								</div>
+								<div class="field">
+									<label for="caiEstablecimiento">Establecimiento</label>
+									<input id="caiEstablecimiento" maxlength="3" value="001">
+								</div>
+								<div class="field">
+									<label for="caiPunto">Punto de emisión</label>
+									<input id="caiPunto" maxlength="3" value="001">
+								</div>
+								<div class="field">
+									<label for="caiDesde">Correlativo desde</label>
+									<input id="caiDesde" type="number" min="1" step="1" value="1">
+								</div>
+								<div class="field">
+									<label for="caiHasta">Correlativo hasta</label>
+									<input id="caiHasta" type="number" min="1" step="1" value="500">
+								</div>
+								<div class="field">
+									<label for="caiFechaLimite">Fecha límite de emisión</label>
+									<input id="caiFechaLimite" type="date" required>
+								</div>
+								<div class="field">
+									<label for="caiActivo">Activo</label>
+									<select id="caiActivo">
+										<option value="true">Sí</option>
+										<option value="false">No</option>
+									</select>
+								</div>
+								<div class="field full">
+									<label for="caiNegocio">Nombre del negocio (en el ticket)</label>
+									<input id="caiNegocio" maxlength="120" value="WS Abarrotes">
+								</div>
+								<div class="field full">
+									<label for="caiDireccion">Dirección fiscal</label>
+									<input id="caiDireccion" maxlength="240">
+								</div>
+								<div class="field">
+									<label for="caiTelefono">Teléfono</label>
+									<input id="caiTelefono" maxlength="30">
+								</div>
+								<div class="field full">
+									<label for="caiPie">Pie de factura</label>
+									<input id="caiPie" maxlength="180" value="¡Gracias por su compra!">
+								</div>
+							</div>
+							<div class="form-actions">
+								<button class="button primary grow" type="submit">Guardar CAI</button>
+								<button class="button" type="button" id="caiCancel" hidden>Cancelar edición</button>
+							</div>
+						</form>
+						<div id="caiStatus" class="cai-status"></div>
+					</section>
+					<section class="card">
+						<h3>Cómo se emite</h3>
+						<div class="settings-note">
+							<p><strong>Factura comercial:</strong> exige un cliente registrado con RTN. La factura muestra el RTN del negocio, el RTN del cliente, la base gravable, el ISV 15% incluido y el total.</p>
+							<p><strong>Recibo:</strong> se puede emitir a Consumidor Final sin RTN. Si el cliente tiene RTN registrado, también se imprime en el recibo.</p>
+							<p>Los precios de venta ya incluyen el ISV. El impuesto se extrae del precio final para reportes y facturación.</p>
+						</div>
+						<div class="settings-preview">
+							<span>Factura</span>
+							<strong>RTN negocio · RTN cliente · Base · ISV 15% · Total</strong>
+						</div>
+					</section>
+				</div>
+			</section>
+			<section class="panel narrow" id="suppliersView" data-panel="suppliers" hidden>
+				<div class="panel-head">
+					<div>
+						<h2>Proveedores</h2>
+						<p>Registra los proveedores de las facturas de compra y relaciónalos con el catálogo.</p>
+					</div>
+					<span class="status-pill" id="supplierCount">0 proveedores</span>
+				</div>
+				<div class="inventory-layout">
+					<section class="card">
+						<h3 id="supplierFormTitle">Nuevo proveedor</h3>
+						<form id="supplierForm">
+							<input id="supplierId" type="hidden">
+							<div class="form-grid product-form-grid">
+								<div class="field full">
+									<label for="supplierName">Nombre o razón social</label>
+									<input id="supplierName" maxlength="160" required>
+								</div>
+								<div class="field">
+									<label for="supplierRtn">RTN</label>
+									<input id="supplierRtn" inputmode="numeric" maxlength="20" placeholder="14 dígitos">
+								</div>
+								<div class="field">
+									<label for="supplierPhone">Teléfono</label>
+									<input id="supplierPhone" maxlength="30">
+								</div>
+								<div class="field">
+									<label for="supplierEmail">Correo</label>
+									<input id="supplierEmail" type="email" maxlength="120">
+								</div>
+								<div class="field">
+									<label for="supplierContact">Contacto</label>
+									<input id="supplierContact" maxlength="120">
+								</div>
+								<div class="field full">
+									<label for="supplierAddress">Dirección</label>
+									<input id="supplierAddress" maxlength="240">
+								</div>
+							</div>
+							<div class="form-actions">
+								<button class="button primary grow" type="submit">Guardar proveedor</button>
+								<button class="button" id="cancelSupplierEdit" type="button" hidden>Cancelar edición</button>
+							</div>
+						</form>
+					</section>
+					<section class="card">
+						<h3>Directorio de proveedores</h3>
+						<div class="list-toolbar">
+							<label>Buscar <input id="supplierSearch" type="search" placeholder="Nombre, RTN o contacto..."></label>
+							<span class="spacer"></span>
+							<span class="status-pill">Proveedores</span>
+						</div>
+						<div class="data-list scroll customer-list" id="supplierList" aria-live="polite"></div>
+					</section>
+				</div>
+			</section>
+
+			<section class="panel narrow" id="purchasesView" data-panel="purchases" hidden>
+				<div class="panel-head">
+					<div>
+						<h2>Compras</h2>
+						<p>Registra la factura de compra del proveedor: productos, costo de compra y entrada de inventario.</p>
+					</div>
+					<span class="status-pill" id="purchaseCount">0 compras</span>
+				</div>
+				<div class="inventory-layout">
+					<section class="card">
+						<h3>Nueva factura de compra</h3>
+						<div class="form-grid product-form-grid">
+							<div class="field full">
+								<label for="purchaseSupplier">Proveedor</label>
+								<select id="purchaseSupplier"></select>
+							</div>
+							<div class="field full">
+								<label for="purchaseProduct">Producto del catálogo</label>
+								<div class="purchase-add-row">
+									<select id="purchaseProduct"></select>
+									<input id="purchaseQty" type="number" min="0.001" step="0.001" value="1" aria-label="Cantidad">
+									<input id="purchaseCost" type="number" min="0" step="0.01" placeholder="Costo" aria-label="Costo unitario">
+									<button class="button primary" type="button" id="purchaseAddItem">Agregar</button>
+								</div>
+								<p class="field-hint">El costo unitario incluye el ISV; se actualiza el stock y el costo del producto.</p>
+							</div>
+							<div class="field full">
+								<label for="purchaseNote">Nota / número de factura del proveedor</label>
+								<input id="purchaseNote" maxlength="200">
+							</div>
+						</div>
+						<div class="data-list purchase-items" id="purchaseItems" aria-live="polite"></div>
+						<div class="purchase-totals" id="purchaseTotals"></div>
+						<div class="form-actions">
+							<button class="button primary grow" type="button" id="purchaseSave">Registrar compra</button>
+							<button class="button" type="button" id="purchaseClear">Vaciar</button>
+						</div>
+					</section>
+					<section class="card">
+						<h3>Historial de compras</h3>
+						<div class="data-list scroll purchase-list" id="purchaseList" aria-live="polite"></div>
+					</section>
+				</div>
+			</section>
+
+			<section class="panel narrow" id="cashView" data-panel="cash" hidden>
+				<div class="panel-head">
+					<div>
+						<h2>Caja</h2>
+						<p>Apertura al iniciar el día y cierre al finalizar, con el efectivo esperado y la diferencia.</p>
+					</div>
+					<span class="status-pill" id="cashStatus">Sin caja</span>
+				</div>
+				<div class="inventory-layout">
+					<section class="card">
+						<h3 id="cashFormTitle">Apertura de caja</h3>
+						<form id="cashForm">
+							<input id="cashId" type="hidden">
+							<div class="form-grid product-form-grid">
+								<div class="field">
+									<label for="cashAmount" id="cashAmountLabel">Monto inicial (L.)</label>
+									<input id="cashAmount" type="number" min="0" step="0.01" value="0">
+								</div>
+								<div class="field full">
+									<label for="cashNote">Notas</label>
+									<input id="cashNote" maxlength="200">
+								</div>
+							</div>
+							<div class="form-actions">
+								<button class="button primary grow" type="submit" id="cashSubmit">Abrir caja</button>
+							</div>
+						</form>
+						<div class="cash-summary" id="cashSummary"></div>
+					</section>
+					<section class="card">
+						<h3>Historial de caja</h3>
+						<div class="data-list scroll" id="cashHistory" aria-live="polite"></div>
+					</section>
+				</div>
+			</section>
+
+			<section class="panel narrow" id="usersView" data-panel="users" hidden>
+				<div class="panel-head">
+					<div>
+						<h2>Usuarios</h2>
+						<p>Administra los usuarios del negocio y el rol con el que ingresan al punto de venta.</p>
+					</div>
+					<span class="status-pill" id="userCount">0 usuarios</span>
+				</div>
+				<div class="inventory-layout">
+					<section class="card">
+						<h3 id="userFormTitle">Nuevo usuario</h3>
+						<form id="userForm">
+							<div class="form-grid product-form-grid">
+								<div class="field full">
+									<label for="userName">Usuario</label>
+									<input id="userName" maxlength="31" required>
+									<p class="field-hint">Debe existir como cuenta en Supabase con el correo <code>usuario@accounts.wsservices.invalid</code>.</p>
+								</div>
+								<div class="field">
+									<label for="userRole">Rol</label>
+									<select id="userRole">
+										<option value="supervisor">Supervisor</option>
+										<option value="caja">Caja</option>
+										<option value="vendedor">Vendedor</option>
+										<option value="admin">Administrador</option>
+										<option value="reception">Recepción</option>
+										<option value="technician">Técnico</option>
+										<option value="viewer">Solo consulta</option>
+									</select>
+								</div>
+								<div class="field">
+									<label for="userActive">Estado</label>
+									<select id="userActive">
+										<option value="true">Activo</option>
+										<option value="false">Inactivo</option>
+									</select>
+								</div>
+							</div>
+							<div class="form-actions">
+								<button class="button primary grow" type="submit">Guardar usuario</button>
+							</div>
+						</form>
+					</section>
+					<section class="card">
+						<h3>Usuarios del negocio</h3>
+						<div class="data-list scroll" id="userList" aria-live="polite"></div>
+					</section>
+				</div>
+			</section>
+		</main>
+	</div>
+
+	<div class="pos-modal" id="ticketModal" hidden role="dialog" aria-modal="true" aria-labelledby="ticketModalTitle">
+		<div class="pos-modal-card">
+			<div class="pos-modal-head">
+				<h3 id="ticketModalTitle">Factura de venta</h3>
+				<button class="modal-close" id="closeTicketModal" type="button" aria-label="Cerrar">×</button>
+			</div>
+			<div class="pos-modal-body" id="ticketContent"></div>
+			<div class="pos-modal-actions">
+				<button class="button" id="closeTicketButton" type="button">Cerrar</button>
+				<button class="button primary" id="printTicketButton" type="button">Imprimir factura</button>
+			</div>
+		</div>
+	</div>
+
+	<div class="pos-modal" id="quickClientModal" hidden role="dialog" aria-modal="true" aria-labelledby="quickClientModalTitle">
+		<div class="pos-modal-card">
+			<div class="pos-modal-head">
+				<h3 id="quickClientModalTitle">Registrar cliente</h3>
+				<button class="modal-close" id="closeQuickClientModal" type="button" aria-label="Cerrar">×</button>
+			</div>
+			<div class="pos-modal-body">
+				<form id="quickClientForm">
+					<input id="quickClientId" type="hidden">
+					<div class="form-grid product-form-grid">
+						<div class="field full">
+							<label for="quickClientName">Nombre o razón social</label>
+							<input id="quickClientName" maxlength="160" required>
+						</div>
+						<div class="field">
+							<label for="quickClientRtn">RTN</label>
+							<input id="quickClientRtn" inputmode="numeric" maxlength="20" placeholder="14 dígitos">
+						</div>
+						<div class="field">
+							<label for="quickClientPhone">Teléfono</label>
+							<input id="quickClientPhone" maxlength="30">
+						</div>
+						<div class="field">
+							<label for="quickClientEmail">Correo</label>
+							<input id="quickClientEmail" type="email" maxlength="120">
+						</div>
+						<div class="field">
+							<label for="quickClientIdentity">Identidad</label>
+							<input id="quickClientIdentity" maxlength="30">
+						</div>
+						<div class="field full">
+							<label for="quickClientAddress">Dirección</label>
+							<input id="quickClientAddress" maxlength="240">
+						</div>
+					</div>
+					<p class="field-hint">El RTN es obligatorio para emitir facturas comerciales. El cliente queda seleccionado en la venta y se guarda en la misma tabla de clientes.</p>
+					<div class="form-actions">
+						<button class="button primary grow" type="submit">Guardar y usar</button>
+						<button class="button" type="button" id="cancelQuickClient">Cancelar</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+
+	<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+	<script>
+		(() => {
+			'use strict';
+			const $ = id => document.getElementById(id);
+			const supabaseSettings = window.WS_SUPABASE_CONFIG || {};
+			const authGate = $('authGate');
+			const appShell = $('appShell');
+			const authDescription = $('authDescription');
+			const authStatus = $('authStatus');
+			const loginForm = $('loginForm');
+			const loginModeButton = $('loginModeButton');
+			const signupModeButton = $('signupModeButton');
+			const loginButton = $('loginButton');
+			const loginUsernameInput = $('loginUsername');
+			const loginPasswordInput = $('loginPassword');
+			const userLabel = $('userLabel');
+			const userRoleTag = $('userRoleTag');
+			const userAvatar = $('userAvatar');
+			const logoutButton = $('logoutButton');
+			let database = null;
+			let activeUserId = null;
+			let activeUserRole = 'viewer';
+			let activeUserName = '';
+			let knownClients = [];
+			let authMode = 'login';
+			let currentView = 'pos';
+			let toastTimer;
+
+			function applyRoleVisibility(role) {
+				const supervisor = ['admin', 'supervisor'].includes(role);
+				const manager = ['admin', 'supervisor', 'caja', 'reception'].includes(role);
+				const show = (view, visible) => {
+					const tab = document.querySelector(`.ribbon-tab[data-view="${view}"]`);
+					if (tab) tab.hidden = !visible;
+				};
+				show('dashboard', true);
+				show('pos', true);
+				show('sales', true);
+				show('products', true);
+				show('customers', true);
+				show('inventory', manager);
+				show('suppliers', manager);
+				show('purchases', manager);
+				show('cash', manager);
+				show('reports', manager);
+				show('users', supervisor);
+				show('settings', supervisor);
+			}
+
+			function money(value) {
+				return `L. ${Number(value || 0).toLocaleString('es-HN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+			}
+
+			function formatDate(value) {
+				if (!value) return '';
+				const [year, month, day] = String(value).split('-').map(Number);
+				if (!year || !month || !day) return '';
+				return new Date(year, month - 1, day).toLocaleDateString('es-HN');
+			}
+
+			function today() {
+				const now = new Date();
+				return new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+			}
+
+			function normalizeKey(value) {
+				return String(value ?? '').trim().toLowerCase()
+					.normalize('NFD')
+					.replace(/[\u0300-\u036f]/g, '')
+					.replace(/[^a-z0-9 ]+/g, ' ')
+					.replace(/\s+/g, ' ')
+					.trim();
+			}
+
+			function escapeHtml(value) {
+				return String(value ?? '')
+					.replace(/&/g, '&amp;')
+					.replace(/</g, '&lt;')
+					.replace(/>/g, '&gt;')
+					.replace(/"/g, '&quot;')
+					.replace(/'/g, '&#39;');
+			}
+
+			function notify(message, variant) {
+				const toast = $('toast');
+				if (!toast) return;
+				toast.textContent = message;
+				toast.className = `toast show${variant === 'error' ? ' error' : ''}`;
+				clearTimeout(toastTimer);
+				toastTimer = setTimeout(() => {
+					toast.className = 'toast';
+				}, 3800);
+			}
+
+			function setView(viewName) {
+				const views = ['dashboard', 'pos', 'sales', 'cash', 'products', 'inventory', 'customers', 'suppliers', 'purchases', 'reports', 'users', 'settings'];
+				const target = views.includes(viewName) ? viewName : 'pos';
+				currentView = target;
+				document.querySelectorAll('[data-panel]').forEach(panel => {
+					panel.hidden = panel.dataset.panel !== target;
+				});
+				document.querySelectorAll('.ribbon-tab').forEach(tab => {
+					tab.setAttribute('aria-selected', String(tab.dataset.view === target));
+				});
+				document.querySelectorAll('[data-ribbon]').forEach(group => {
+					group.hidden = group.dataset.ribbon !== target;
+				});
+				if (target === 'dashboard') void window.WSApp?.renderDashboard?.();
+				if (target === 'pos') void window.WSApp?.renderPOS?.();
+				if (target === 'products') void window.WSApp?.renderProductsView?.();
+				if (target === 'sales') void window.WSApp?.renderSalesView?.();
+				if (target === 'inventory') void window.WSApp?.renderInventoryView?.();
+				if (target === 'customers') void window.WSApp?.renderCustomersView?.();
+				if (target === 'suppliers') void window.WSApp?.renderSuppliersView?.();
+				if (target === 'purchases') void window.WSApp?.renderPurchasesView?.();
+				if (target === 'cash') void window.WSApp?.renderCashView?.();
+				if (target === 'reports') void window.WSApp?.renderReportsView?.();
+				if (target === 'users') void window.WSApp?.renderUsersView?.();
+				if (target === 'settings') void window.WSApp?.renderSettingsView?.();
+			}
+
+			async function refreshCurrent() {
+				if (currentView === 'dashboard') await window.WSApp?.refreshDashboard?.();
+				else if (currentView === 'pos') await window.WSApp?.refreshPOS?.();
+				else if (currentView === 'products') await window.WSApp?.refreshProducts?.();
+				else if (currentView === 'sales') await window.WSApp?.refreshSales?.();
+				else if (currentView === 'inventory') await window.WSApp?.refreshInventory?.();
+				else if (currentView === 'customers') await window.WSApp?.refreshCustomers?.();
+				else if (currentView === 'suppliers') await window.WSApp?.refreshSuppliers?.();
+				else if (currentView === 'purchases') await window.WSApp?.refreshPurchases?.();
+				else if (currentView === 'cash') await window.WSApp?.refreshCash?.();
+				else if (currentView === 'reports') await window.WSApp?.refreshReports?.();
+				else if (currentView === 'users') await window.WSApp?.refreshUsers?.();
+				else if (currentView === 'settings') await window.WSApp?.renderSettingsView?.();
+			}
+
+			async function loadClients() {
+				if (!database) return;
+				let result = await database.from('clientes').select('id, nombre, rtn').order('nombre');
+				if (result.error) {
+					result = await database.from('clientes').select('id, nombre').order('nombre');
+				}
+				knownClients = result.error ? [] : (result.data || []).map(client => ({ ...client, rtn: client.rtn || '' }));
+			}
+
+			function authEmailFromUsername(value) {
+				const username = value.trim().toLowerCase();
+				if (!/^[a-z0-9][a-z0-9._-]{1,30}$/.test(username)) return null;
+				return `${username}@accounts.wsservices.invalid`;
+			}
+
+			async function activateSession(session, options = {}) {
+				const { force = false } = options;
+				if (!session) {
+					activeUserId = null;
+					activeUserRole = 'viewer';
+					authGate.hidden = false;
+					appShell.hidden = true;
+					return false;
+				}
+				if (!force && activeUserId === session.user.id && !appShell.hidden) return true;
+
+				const { data: authorized, error: authError } = await database.rpc('usuario_autorizado');
+				if (authError || !authorized) {
+					if (force) return false;
+					authStatus.textContent = 'Este usuario no está autorizado para el punto de venta.';
+					await database.auth.signOut();
+					return false;
+				}
+				const { data: currentRows, error: userError } = await database.rpc('usuario_actual');
+				const currentUser = Array.isArray(currentRows) ? currentRows[0] : currentRows;
+				if (userError || !currentUser) {
+					if (force) return false;
+					authStatus.textContent = 'No se pudo cargar el perfil autorizado.';
+					await database.auth.signOut();
+					return false;
+				}
+				if (!['admin', 'supervisor', 'caja', 'vendedor', 'reception'].includes(currentUser.role)) {
+					if (force) return false;
+					authStatus.textContent = 'Tu usuario no tiene acceso al punto de venta de WS Abarrotes.';
+					await database.auth.signOut();
+					return false;
+				}
+
+				activeUserId = session.user.id;
+				activeUserRole = currentUser.role;
+				activeUserName = currentUser.email || 'Usuario';
+				applyRoleVisibility(activeUserRole);
+				if (force) return true;
+
+				authGate.hidden = true;
+				appShell.hidden = false;
+				const displayName = activeUserName;
+				userLabel.textContent = displayName;
+				userRoleTag.textContent = activeUserRole;
+				userAvatar.textContent = displayName.slice(0, 1).toUpperCase();
+				await loadClients();
+				setView('pos');
+				return true;
+			}
+
+			async function ensureActiveSession() {
+				if (!database) return false;
+				const { data, error } = await database.auth.getSession();
+				if (error || !data.session) {
+					notify('La sesión terminó. Vuelve a ingresar.', 'error');
+					appShell.hidden = true;
+					authGate.hidden = false;
+					return false;
+				}
+				try {
+					return Boolean(await activateSession(data.session, { force: true }));
+				} catch {
+					return false;
+				}
+			}
+
+			function initializeDatabase() {
+				if (!supabaseSettings.url || !supabaseSettings.anonKey) {
+					authDescription.textContent = 'La conexión segura con Supabase todavía no está configurada.';
+					authStatus.textContent = 'Configura la URL y la clave pública del proyecto para habilitar el punto de venta.';
+					loginButton.disabled = true;
+					return;
+				}
+				if (!window.supabase?.createClient) {
+					authStatus.textContent = 'No se pudo cargar el cliente de base de datos. Revisa tu conexión.';
+					loginButton.disabled = true;
+					return;
+				}
+
+				database = window.supabase.createClient(supabaseSettings.url, supabaseSettings.anonKey);
+
+				function selectAuthMode(mode) {
+					authMode = mode;
+					const registering = mode === 'signup';
+					loginModeButton.setAttribute('aria-pressed', String(!registering));
+					signupModeButton.setAttribute('aria-pressed', String(registering));
+					loginButton.textContent = registering ? 'Crear cuenta' : 'Ingresar';
+					loginPasswordInput.autocomplete = registering ? 'new-password' : 'current-password';
+					authDescription.textContent = registering
+						? 'Crea tu usuario y contraseña. El administrador debe autorizarlo primero.'
+						: 'Ingresa con tu nombre de usuario y contraseña.';
+					authStatus.textContent = '';
+				}
+
+				loginModeButton.addEventListener('click', () => selectAuthMode('login'));
+				signupModeButton.addEventListener('click', () => selectAuthMode('signup'));
+				loginForm.addEventListener('submit', async event => {
+					event.preventDefault();
+					if (!loginForm.reportValidity()) return;
+					loginButton.disabled = true;
+					authStatus.textContent = authMode === 'signup' ? 'Creando cuenta…' : 'Validando acceso…';
+					const email = authEmailFromUsername(loginUsernameInput.value);
+					if (!email) {
+						loginButton.disabled = false;
+						authStatus.textContent = 'Usa 2-31 caracteres: letras, números, punto, guion o guion bajo. No escribas @.';
+						return;
+					}
+					const password = loginPasswordInput.value;
+					const result = authMode === 'signup'
+						? await database.auth.signUp({ email, password })
+						: await database.auth.signInWithPassword({ email, password });
+					loginButton.disabled = false;
+
+					if (result.error) {
+						const message = result.error.message.toLowerCase();
+						if (authMode === 'signup' && message.includes('already registered')) {
+							authStatus.textContent = 'Este usuario ya tiene cuenta. Selecciona Ingresar.';
+						} else if (authMode === 'signup') {
+							authStatus.textContent = 'No se pudo crear la cuenta. Revisa el usuario y la contraseña.';
+						} else {
+							authStatus.textContent = 'Usuario o contraseña incorrectos.';
+						}
+						return;
+					}
+					if (authMode === 'signup' && !result.data.session) {
+						authStatus.textContent = 'Cuenta creada. Pide al administrador que autorice este usuario.';
+						return;
+					}
+					if (result.data.session) await activateSession(result.data.session);
+				});
+				database.auth.onAuthStateChange((_event, session) => {
+					setTimeout(() => activateSession(session), 0);
+				});
+				database.auth.getSession().then(({ data }) => activateSession(data.session));
+			}
+
+			document.querySelectorAll('.ribbon-tab').forEach(tab => {
+				tab.addEventListener('click', () => setView(tab.dataset.view));
+			});
+			document.getElementById('ribbon').addEventListener('click', event => {
+				const command = event.target.closest('[data-action]');
+				if (!command) return;
+				if (command.dataset.action === 'refresh') void refreshCurrent();
+				if (command.dataset.action === 'logout' && database) void database.auth.signOut();
+			});
+			logoutButton.addEventListener('click', async () => {
+				if (database) await database.auth.signOut();
+			});
+
+			window.WSApp = {
+				get database() { return database; },
+				get activeUserId() { return activeUserId; },
+				get activeUserRole() { return activeUserRole; },
+				get activeUserName() { return activeUserName; },
+				get knownClients() { return knownClients; },
+				money,
+				escapeHtml,
+				notify,
+				today,
+				normalizeKey,
+				formatDate,
+				setView,
+				reloadClients: loadClients,
+				ensureActiveSession
+			};
+
+			if ('serviceWorker' in navigator) {
+				navigator.serviceWorker.register('./service-worker-abarrotes.js').catch(() => {});
+			}
+			initializeDatabase();
+		})();
+	</script>
+	<script src="./pos.js"></script>
+</body>
+</html>
