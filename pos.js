@@ -580,14 +580,15 @@
 		if (!Number.isFinite(received)) received = 0;
 		if (!state.cart.size) {
 			received = 0;
-			if (cashInput) cashInput.value = '';
+			if (cashInput && document.activeElement !== cashInput) {
+				cashInput.value = '';
+			}
 		} else if (state.payment !== 'Efectivo') {
 			received = total;
 			if (cashInput) cashInput.value = total > 0 ? total.toFixed(2) : '';
-		} else if (cashInput && cashInput.value === '') {
-			received = total;
-			cashInput.value = total > 0 ? total.toFixed(2) : '';
 		}
+		// Para pago en efectivo: usar lo que el usuario escribió (o 0 si vacío)
+		// No auto-llenar con el total; el usuario ingresa su monto libremente
 		const change = round2(received - total);
 		if (changeBox) changeBox.classList.toggle('negative', change < -0.001);
 		if (changeLabel) changeLabel.textContent = change < 0 ? `- ${money(Math.abs(change))}` : money(change);
@@ -771,7 +772,6 @@
 		window.__debugSave = { editing, isEditing, title: $('quickClientModalTitle')?.textContent, quickClientId: $('quickClientId').value, windowEditing: window.__editingClientId };
 		notify(isEditing ? 'Cliente actualizado.' : `Cliente ${name} registrado.`);
 		window.__editingClientId = null;
-	
 		if (modal) delete modal.dataset.editingId;
 		closeQuickClient();
 		state.customersLoaded = false;
@@ -1886,7 +1886,22 @@
 			const discount = round2(Math.max(0, Math.min(Number(input.value || 0), subtotal)));
 			input.value = discount > 0 ? discount.toFixed(2) : '';
 		});
-		$('posCashReceived')?.addEventListener('input', updateTotals);
+		$('posCashReceived')?.addEventListener('input', () => {
+		const cashInput = $('posCashReceived');
+		const changeLabel = $('posChange');
+		const changeBox = $('posChangeBox');
+		const chargeButton = $('posChargeButton');
+		if (!cashInput) return;
+		const received = Number(String(cashInput.value || '0').replace(',', '.'));
+		const total = state.total || 0;
+		const change = round2((Number.isFinite(received) ? received : 0) - total);
+		if (changeBox) changeBox.classList.toggle('negative', change < -0.001);
+		if (changeLabel) changeLabel.textContent = change < 0 ? `- ${money(Math.abs(change))}` : money(change);
+		if (chargeButton) {
+			const insufficientCash = state.payment === 'Efectivo' && (Number.isFinite(received) ? received : 0) < total - 0.001;
+			chargeButton.disabled = state.busy || state.cart.size === 0 || insufficientCash;
+		}
+	});
 		$('posCashReceived')?.addEventListener('focus', () => { $('posCashReceived')?.select(); });
 		$('posCashReceived')?.addEventListener('click', () => { $('posCashReceived')?.select(); });
 	$('posCashReceived')?.addEventListener('blur', () => {
