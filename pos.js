@@ -771,7 +771,7 @@
 		window.__debugSave = { editing, isEditing, title: $('quickClientModalTitle')?.textContent, quickClientId: $('quickClientId').value, windowEditing: window.__editingClientId };
 		notify(isEditing ? 'Cliente actualizado.' : `Cliente ${name} registrado.`);
 		window.__editingClientId = null;
-		const modal = $('quickClientModal');
+	
 		if (modal) delete modal.dataset.editingId;
 		closeQuickClient();
 		state.customersLoaded = false;
