@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
 	<meta charset="UTF-8">
@@ -9,7 +9,7 @@
 	<link rel="manifest" href="./manifest-abarrotes.webmanifest">
 	<link rel="icon" href="./icon.svg" type="image/svg+xml">
 	<link rel="apple-touch-icon" href="./icon.svg">
-	<title>WS Abarrotes Â· Punto de venta</title>
+	<title>WS Abarrotes · Punto de venta</title>
 	<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 	<script src="./supabase-config.js"></script>
 	<link rel="stylesheet" href="./abarrotes-base.css">
@@ -367,7 +367,7 @@
 			<div class="pos-setup-banner" id="posSetupBanner" hidden>
 				<div>
 					<strong>Falta activar el punto de venta</strong>
-					Ejecuta el archivo <code>data base pos.sql</code> en Supabase â†’ SQL Editor y luego recarga esta página.
+					Ejecuta el archivo <code>data base pos.sql</code> en Supabase → SQL Editor y luego recarga esta página.
 				</div>
 			</div>
 
@@ -462,7 +462,7 @@
 							<div class="pos-bank-row" id="posBankRow" hidden>
 								<label for="posCardBank">Banco / terminal POS
 									<select id="posCardBank">
-										<option value="">Selecciona el bancoâ€¦</option>
+										<option value="">Selecciona el banco…</option>
 										<option value="BAC Credomatic">BAC Credomatic</option>
 										<option value="Banco Atlántida">Banco Atlántida</option>
 										<option value="Banco Nacional de Honduras">Banco Nacional de Honduras</option>
@@ -488,7 +488,7 @@
 							<input id="posNote" type="text" maxlength="300" placeholder="Opcional">
 						</div>
 						<button class="button primary pos-charge-button" id="posChargeButton" type="button" disabled>Cobrar venta</button>
-						<p class="pos-hint">F2 buscar Â· F4 cobrar Â· Enter agrega el código escaneado</p>
+						<p class="pos-hint">F2 buscar · F4 cobrar · Enter agrega el código escaneado</p>
 					</aside>
 				</div>
 			</section>
@@ -838,7 +838,7 @@
 						</form>
 					</section>
 					<section class="card">
-						<h3>CAI Â· Código de Autorización de Impresión (SAR)</h3>
+						<h3>CAI · Código de Autorización de Impresión (SAR)</h3>
 						<form id="caiForm">
 							<input id="caiId" type="hidden">
 							<div class="form-grid product-form-grid">
@@ -853,8 +853,8 @@
 								<div class="field">
 									<label for="caiTipo">Tipo de documento</label>
 									<select id="caiTipo">
-										<option value="01">01 Â· Factura Comercial</option>
-										<option value="02">02 Â· Recibo</option>
+										<option value="01">01 · Factura Comercial</option>
+										<option value="02">02 · Recibo</option>
 									</select>
 								</div>
 								<div class="field">
@@ -898,7 +898,7 @@
 								</div>
 								<div class="field full">
 									<label for="caiPie">Pie de factura</label>
-									<input id="caiPie" maxlength="180" value="Â¡Gracias por su compra!">
+									<input id="caiPie" maxlength="180" value="¡Gracias por su compra!">
 								</div>
 							</div>
 							<div class="form-actions">
@@ -917,7 +917,7 @@
 						</div>
 						<div class="settings-preview">
 							<span>Factura</span>
-							<strong>RTN negocio Â· RTN cliente Â· Base Â· ISV 15% Â· Total</strong>
+							<strong>RTN negocio · RTN cliente · Base · ISV 15% · Total</strong>
 						</div>
 					</section>
 				</div>
@@ -1116,7 +1116,7 @@
 		<div class="pos-modal-card">
 			<div class="pos-modal-head">
 				<h3 id="ticketModalTitle">Factura de venta</h3>
-				<button class="modal-close" id="closeTicketModal" type="button" aria-label="Cerrar">í—</button>
+				<button class="modal-close" id="closeTicketModal" type="button" aria-label="Cerrar">×</button>
 			</div>
 			<div class="pos-modal-body" id="ticketContent"></div>
 			<div class="pos-modal-actions">
@@ -1130,7 +1130,7 @@
 		<div class="pos-modal-card">
 			<div class="pos-modal-head">
 				<h3 id="quickClientModalTitle">Registrar cliente</h3>
-				<button class="modal-close" id="closeQuickClientModal" type="button" aria-label="Cerrar">í—</button>
+				<button class="modal-close" id="closeQuickClientModal" type="button" aria-label="Cerrar">×</button>
 			</div>
 			<div class="pos-modal-body">
 				<form id="quickClientForm">
@@ -1176,7 +1176,7 @@
 	<div class="pos-modal-card" id="configModal" hidden role="dialog" aria-modal="true" aria-labelledby="configModalTitle">
 		<div class="pos-modal-head">
 			<h3 id="configModalTitle">Configuración de la Empresa y CAI</h3>
-			<button class="modal-close" type="button" aria-label="Cerrar">í—</button>
+			<button class="modal-close" type="button" aria-label="Cerrar">×</button>
 		</div>
 		<div class="pos-modal-body">
 			<form id="configForm">
@@ -1554,7 +1554,7 @@
 					event.preventDefault();
 					if (!loginForm.reportValidity()) return;
 					loginButton.disabled = true;
-					authStatus.textContent = authMode === 'signup' ? 'Creando cuentaâ€¦' : 'Validando accesoâ€¦';
+					authStatus.textContent = authMode === 'signup' ? 'Creando cuenta…' : 'Validando acceso…';
 					const email = authEmailFromUsername(loginUsernameInput.value);
 					if (!email) {
 						loginButton.disabled = false;

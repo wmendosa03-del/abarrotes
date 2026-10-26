@@ -1,6 +1,6 @@
-﻿/* ============================================================
-   WS Services Â· Punto de venta
-   Estilos del mÃ³dulo POS. Se cargan despuÃ©s del estilo base.
+/* ============================================================
+   WS Services · Punto de venta
+   Estilos del módulo POS. Se cargan después del estilo base.
    ============================================================ */
 
 body.pos-modal-open { overflow: hidden; }
@@ -240,7 +240,7 @@ body.pos-modal-open { overflow: hidden; }
 .ticket-paper .ticket-foot { margin: 10px 0 0; color: #6f7a88; font-size: 9px; text-align: center; }
 .ticket-paper .ticket-annulled { margin: 8px 0; padding: 5px; border: 1px solid #b33; color: #a4262c; font-size: 10px; font-weight: 700; text-align: center; }
 
-/* Documento, clientes y nuevos mÃ³dulos */
+/* Documento, clientes y nuevos módulos */
 .pos-customer-actions { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
 .pos-customer-actions .button { flex: 1 1 auto; min-height: 26px; }
 .pos-customer-tax { margin: 5px 0 0; color: var(--faint); font-size: 10px; }
@@ -344,7 +344,7 @@ body.pos-modal-open { overflow: hidden; }
 .report-row-total { border-top: 1px solid var(--line-strong); border-bottom: 0; margin-top: 4px; }
 .report-row-total .report-row-head span { font-weight: 700; color: var(--ink); }
 
-/* CÃ³digo de barras y etiquetas */
+/* Código de barras y etiquetas */
 .code-row { display: flex; gap: 6px; align-items: center; }
 .code-row input { flex: 1; min-width: 0; }
 .code-row .button { flex: 0 0 auto; white-space: nowrap; }
