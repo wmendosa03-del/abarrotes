@@ -20,6 +20,7 @@
 		<div class="auth-logo" aria-hidden="true">WS</div>
 		<h1 id="authTitle">WS Abarrotes</h1>
 		<p id="authDescription">Sistema de punto de venta para abarrotes.</p>
+		<p class="auth-copyright">© 2026 Walter Sabula. Todos los derechos reservados.</p>
 		<div class="auth-modes" role="group" aria-label="Modo de acceso">
 			<button id="loginModeButton" type="button" aria-pressed="true">Iniciar sesión</button>
 			<button id="signupModeButton" type="button" aria-pressed="false">Registrarse</button>
@@ -403,6 +404,10 @@
 						<div class="pos-cart-customer">
 							<div class="pos-customer-head">
 								<label for="posCustomer">Cliente</label>
+								<div class="pos-customer-search">
+									<input id="posCustomerSearch" type="search" placeholder="Buscar cliente..." maxlength="80">
+									<button class="button small" type="button" id="posCustomerSearchBtn" title="Buscar cliente">Buscar</button>
+								</div>
 							</div>
 							<select id="posCustomer">
 								<option value="">Consumidor Final</option>
@@ -644,7 +649,7 @@
 				<div class="dashboard-tax" id="dashboardTax"></div>
 				<div class="dashboard-columns">
 					<section class="card">
-						<h3>íšltimas ventas</h3>
+						<h3>Últimas ventas</h3>
 						<div class="data-list dashboard-list" id="dashboardRecentSales" aria-live="polite"></div>
 					</section>
 					<section class="card">
@@ -780,148 +785,120 @@
 				</section>
 			</section>
 
-			<section class="panel narrow" id="settingsView" data-panel="settings" hidden>
+						<section class="panel narrow" id="settingsView" data-panel="settings" hidden>
 				<div class="panel-head">
 					<div>
 						<h2>Configuración</h2>
-						<p>Datos del negocio que aparecen en la factura, ISV predeterminado y preferencias del punto de venta.</p>
+						<p>Datos del negocio, ISV predeterminado y CAI para facturación.</p>
 					</div>
 					<span class="status-pill">Facturación</span>
 				</div>
-				<div class="inventory-layout">
-					<section class="card">
-						<h3>Datos del negocio</h3>
-						<form id="settingsForm">
-							<div class="form-grid product-form-grid">
-								<div class="field full">
-									<label for="settingsBusinessName">Nombre del negocio</label>
-									<input id="settingsBusinessName" maxlength="120">
-								</div>
-								<div class="field">
-									<label for="settingsRtn">RTN del negocio</label>
-									<input id="settingsRtn" inputmode="numeric" maxlength="20" placeholder="14 dígitos">
-								</div>
-								<div class="field">
-									<label for="settingsPhone">Teléfono</label>
-									<input id="settingsPhone" maxlength="30">
-								</div>
-								<div class="field full">
-									<label for="settingsAddress">Dirección</label>
-									<input id="settingsAddress" maxlength="240">
-								</div>
-								<div class="field full">
-									<label for="settingsEmail">Correo</label>
-									<input id="settingsEmail" type="email" maxlength="120">
-								</div>
-								<div class="field full">
-									<label for="settingsFooter">Mensaje al pie de la factura</label>
-									<input id="settingsFooter" maxlength="180">
-								</div>
-								<div class="field">
-									<label for="settingsTax">ISV predeterminado (%)</label>
-									<input id="settingsTax" type="number" min="0" max="100" step="0.01" value="15">
-								</div>
-								<div class="field">
-									<label for="settingsStockMin">Stock mínimo predeterminado</label>
-									<input id="settingsStockMin" type="number" min="0" step="0.001" value="5">
-								</div>
-								<div class="field">
-									<label for="settingsCurrency">Símbolo de moneda</label>
-									<input id="settingsCurrency" maxlength="8" value="L.">
-								</div>
+				<section class="card">
+					<form id="configForm">
+									<div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:start;">
+											<div class="form-grid product-form-grid">
 
-							</div>
-							<div class="form-actions">
-								<button class="button primary grow" type="submit">Guardar configuración</button>
-								<button class="button" id="resetSettings" type="button">Restaurar</button>
-							</div>
-						</form>
-					</section>
-					<section class="card">
-						<h3>CAI · Código de Autorización de Impresión (SAR)</h3>
-						<form id="caiForm">
-							<input id="caiId" type="hidden">
-							<div class="form-grid product-form-grid">
-								<div class="field full">
-									<label for="caiCai">CAI (36 caracteres)</label>
-									<input id="caiCai" maxlength="40" placeholder="XXXXXX-XXXX-XXXX-XXXX-XXXX-XXXX" required>
-								</div>
-								<div class="field">
-									<label for="caiRtn">RTN del emisor</label>
-									<input id="caiRtn" inputmode="numeric" maxlength="20" placeholder="14 dígitos" required>
-								</div>
-								<div class="field">
-									<label for="caiTipo">Tipo de documento</label>
-									<select id="caiTipo">
-										<option value="01">01 · Factura Comercial</option>
-										<option value="02">02 · Recibo</option>
-									</select>
-								</div>
-								<div class="field">
-									<label for="caiEstablecimiento">Establecimiento</label>
-									<input id="caiEstablecimiento" maxlength="3" value="001">
-								</div>
-								<div class="field">
-									<label for="caiPunto">Punto de emisión</label>
-									<input id="caiPunto" maxlength="3" value="001">
-								</div>
-								<div class="field">
-									<label for="caiDesde">Correlativo desde</label>
-									<input id="caiDesde" type="number" min="1" step="1" value="1">
-								</div>
-								<div class="field">
-									<label for="caiHasta">Correlativo hasta</label>
-									<input id="caiHasta" type="number" min="1" step="1" value="500">
-								</div>
-								<div class="field">
-									<label for="caiFechaLimite">Fecha límite de emisión</label>
-									<input id="caiFechaLimite" type="date" required>
-								</div>
-								<div class="field">
-									<label for="caiActivo">Activo</label>
-									<select id="caiActivo">
-										<option value="true">Sí</option>
-										<option value="false">No</option>
-									</select>
-								</div>
-								<div class="field full">
-									<label for="caiNegocio">Nombre del negocio (en el ticket)</label>
-									<input id="caiNegocio" maxlength="120" value="WS Abarrotes">
-								</div>
-								<div class="field full">
-									<label for="caiDireccion">Dirección fiscal</label>
-									<input id="caiDireccion" maxlength="240">
-								</div>
-								<div class="field">
-									<label for="caiTelefono">Teléfono</label>
-									<input id="caiTelefono" maxlength="30">
-								</div>
-								<div class="field full">
-									<label for="caiPie">Pie de factura</label>
-									<input id="caiPie" maxlength="180" value="¡Gracias por su compra!">
-								</div>
-							</div>
-							<div class="form-actions">
-								<button class="button primary grow" type="submit">Guardar CAI</button>
-								<button class="button" type="button" id="caiCancel" hidden>Cancelar edición</button>
-							</div>
-						</form>
-						<div id="caiStatus" class="cai-status"></div>
-					</section>
-					<section class="card">
-						<h3>Cómo se emite</h3>
-						<div class="settings-note">
-							<p><strong>Factura comercial:</strong> exige un cliente registrado con RTN. La factura muestra el RTN del negocio, el RTN del cliente, la base gravable, el ISV 15% incluido y el total.</p>
-							<p><strong>Recibo:</strong> se puede emitir a Consumidor Final sin RTN. Si el cliente tiene RTN registrado, también se imprime en el recibo.</p>
-							<p>Los precios de venta ya incluyen el ISV. El impuesto se extrae del precio final para reportes y facturación.</p>
-						</div>
-						<div class="settings-preview">
-							<span>Factura</span>
-							<strong>RTN negocio · RTN cliente · Base · ISV 15% · Total</strong>
-						</div>
-					</section>
+
+										<div class="field full">
+						<label for="configNegocio">Nombre del negocio *</label>
+						<input id="configNegocio" name="negocio" maxlength="120" required>
+					</div>
+					<div class="field">
+						<label for="configRtn">RTN del negocio (14 dígitos)</label>
+						<input id="configRtn" name="rtn" inputmode="numeric" maxlength="14" placeholder="14 dígitos" pattern="[0-9]{14}">
+					</div>
+					<div class="field">
+						<label for="configTelefono">Teléfono</label>
+						<input id="configTelefono" name="telefono" maxlength="30">
+					</div>
+					<div class="field full">
+						<label for="configDireccion">Dirección fiscal</label>
+						<input id="configDireccion" name="direccion" maxlength="240">
+					</div>
+					<div class="field full">
+						<label for="configCorreo">Correo electrónico</label>
+						<input id="configCorreo" name="correo" type="email" maxlength="120">
+					</div>
+										<div class="field full">
+						<label for="configPie">Mensaje al pie de la factura</label>
+						<input id="configPie" name="pie" maxlength="180">
+					</div>
+					<div class="field">
+						<label for="configIsv">ISV predeterminado (%)</label>
+						<input id="configIsv" name="isv" type="number" min="0" max="100" step="0.01" value="15">
+					</div>
+					<div class="field">
+						<label for="configStockMin">Stock mínimo predeterminado</label>
+						<input id="configStockMin" name="stockMinimo" type="number" min="0" step="0.001" value="5">
+					</div>
+					<div class="field">
+						<label for="configMoneda">Símbolo de moneda</label>
+						<input id="configMoneda" name="moneda" maxlength="8" value="L.">
+					</div>
+					</div>
+					<div class="form-grid product-form-grid">
+										<div class="field full">
+						<label for="configCai">CAI *</label>
+						<input id="configCai" name="cai" maxlength="40" placeholder="XXXXXX-XXXX-XXXX-XXXX-XXXX-XXXX" required>
+					</div>
+					<div class="field">
+						<label for="configCaiRtn">RTN del emisor *</label>
+						<input id="configCaiRtn" name="caiRtn" inputmode="numeric" maxlength="14" placeholder="14 dígitos" pattern="[0-9]{14}" required>
+					</div>
+					<div class="field">
+						<label for="configCaiTipo">Tipo de documento *</label>
+						<select id="configCaiTipo" name="caiTipo" required>
+							<option value="01">01 — Factura Comercial</option>
+							<option value="02">02 — Recibo</option>
+						</select>
+					</div>
+					<div class="field">
+						<label for="configCaiEstablecimiento">Establecimiento</label>
+						<input id="configCaiEstablecimiento" name="caiEstablecimiento" maxlength="3" value="001">
+					</div>
+					<div class="field">
+						<label for="configCaiPunto">Punto de emisión</label>
+						<input id="configCaiPunto" name="caiPunto" maxlength="3" value="001">
+					</div>
+					<div class="field">
+						<label for="configCaiDesde">Correlativo desde</label>
+						<input id="configCaiDesde" name="caiDesde" type="number" min="1" step="1" value="1" required>
+					</div>
+					<div class="field">
+						<label for="configCaiHasta">Correlativo hasta</label>
+						<input id="configCaiHasta" name="caiHasta" type="number" min="1" step="1" value="8000" required>
+					</div>
+					<div class="field">
+						<label for="configCaiFechaLimite">Fecha límite de emisión *</label>
+						<input id="configCaiFechaLimite" name="caiFechaLimite" type="date" required>
+					</div>
+										<div class="field full">
+						<label for="configCaiNegocio">Nombre en ticket</label>
+						<input id="configCaiNegocio" name="caiNegocio" maxlength="120" placeholder="Igual al nombre de la empresa">
+					</div>
+					<div class="field full">
+						<label for="configCaiDireccion">Dirección en ticket</label>
+						<input id="configCaiDireccion" name="caiDireccion" maxlength="240" placeholder="Igual a la dirección fiscal">
+					</div>
+					<div class="field">
+						<label for="configCaiTelefono">Teléfono en ticket</label>
+						<input id="configCaiTelefono" name="caiTelefono" maxlength="30" placeholder="Igual al teléfono de la empresa">
+					</div>
+					<div class="field full">
+						<label for="configCaiPie">Pie de factura en ticket</label>
+						<input id="configCaiPie" name="caiPie" maxlength="180" placeholder="Igual al pie de factura">
+					</div>
 				</div>
+				<div class="form-actions">
+					<button class="button primary grow" type="submit" id="configSaveBtn">Guardar todo</button>
+					<button class="button" type="button" id="configUpdateBtn">Actualizar</button>
+					<button class="button" type="button" id="configResetBtn">Restaurar defectos</button>
+					<button class="button" type="button" id="configCancelBtn">Cancelar</button>
+				</div>
+			</form>
+				</section>
 			</section>
+
 			<section class="panel narrow" id="suppliersView" data-panel="suppliers" hidden>
 				<div class="panel-head">
 					<div>
@@ -1110,6 +1087,7 @@
 				</div>
 			</section>
 		</main>
+		<footer class="app-footer">© 2026 Walter Sabula. Todos los derechos reservados.</footer>
 	</div>
 
 	<div class="pos-modal" id="ticketModal" hidden role="dialog" aria-modal="true" aria-labelledby="ticketModalTitle">
@@ -1171,136 +1149,27 @@
 		</div>
 	</div>
 
-	
-<!-- Modal Configuración Unificada: Empresa + CAI -->
-	<div class="pos-modal-card" id="configModal" hidden role="dialog" aria-modal="true" aria-labelledby="configModalTitle">
-		<div class="pos-modal-head">
-			<h3 id="configModalTitle">Configuración de la Empresa y CAI</h3>
-			<button class="modal-close" type="button" aria-label="Cerrar">×</button>
-		</div>
-		<div class="pos-modal-body">
-			<form id="configForm">
-				<div class="form-grid product-form-grid">
-					<!-- Datos de la Empresa -->
-					<div class="field full" style="grid-column: 1 / -1;">
-						<h4 style="margin: 8px 0; color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 4px;">Datos de la Empresa</h4>
-					</div>
-					<div class="field full">
-						<label for="configNegocio">Nombre del negocio *</label>
-						<input id="configNegocio" name="negocio" maxlength="120" required>
-					</div>
-					<div class="field">
-						<label for="configRtn">RTN del negocio (14 dígitos)</label>
-						<input id="configRtn" name="rtn" inputmode="numeric" maxlength="14" placeholder="14 dígitos" pattern="[0-9]{14}">
-					</div>
-					<div class="field">
-						<label for="configTelefono">Teléfono</label>
-						<input id="configTelefono" name="telefono" maxlength="30">
-					</div>
-					<div class="field full">
-						<label for="configDireccion">Dirección fiscal</label>
-						<input id="configDireccion" name="direccion" maxlength="240">
-					</div>
-					<div class="field full">
-						<label for="configCorreo">Correo electrónico</label>
-						<input id="configCorreo" name="correo" type="email" maxlength="120">
-					</div>
-					<!-- Configuración de Facturación -->
-					<div class="field full" style="grid-column: 1 / -1;">
-						<h4 style="margin: 16px 0 8px; color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 4px;">Configuración de Facturación</h4>
-					</div>
-					<div class="field full">
-						<label for="configPie">Mensaje al pie de la factura</label>
-						<input id="configPie" name="pie" maxlength="180">
-					</div>
-					<div class="field">
-						<label for="configIsv">ISV predeterminado (%)</label>
-						<input id="configIsv" name="isv" type="number" min="0" max="100" step="0.01" value="15">
-					</div>
-					<div class="field">
-						<label for="configStockMin">Stock mínimo predeterminado</label>
-						<input id="configStockMin" name="stockMinimo" type="number" min="0" step="0.001" value="5">
-					</div>
-					<div class="field">
-						<label for="configMoneda">Símbolo de moneda</label>
-						<input id="configMoneda" name="moneda" maxlength="8" value="L.">
-					</div>
-					<!-- CAI - Código de Autorización de Impresión -->
-					<div class="field full" style="grid-column: 1 / -1;">
-						<h4 style="margin: 16px 0 8px; color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 4px;">CAI — Código de Autorización de Impresión (SAR)</h4>
-					</div>
-					<div class="field full">
-						<label for="configCai">CAI *</label>
-						<input id="configCai" name="cai" maxlength="40" placeholder="XXXXXX-XXXX-XXXX-XXXX-XXXX-XXXX" required>
-					</div>
-					<div class="field">
-						<label for="configCaiRtn">RTN del emisor *</label>
-						<input id="configCaiRtn" name="caiRtn" inputmode="numeric" maxlength="14" placeholder="14 dígitos" pattern="[0-9]{14}" required>
-					</div>
-					<div class="field">
-						<label for="configCaiTipo">Tipo de documento *</label>
-						<select id="configCaiTipo" name="caiTipo" required>
-							<option value="01">01 — Factura Comercial</option>
-							<option value="02">02 — Recibo</option>
-						</select>
-					</div>
-					<div class="field">
-						<label for="configCaiEstablecimiento">Establecimiento</label>
-						<input id="configCaiEstablecimiento" name="caiEstablecimiento" maxlength="3" value="001">
-					</div>
-					<div class="field">
-						<label for="configCaiPunto">Punto de emisión</label>
-						<input id="configCaiPunto" name="caiPunto" maxlength="3" value="001">
-					</div>
-					<div class="field">
-						<label for="configCaiDesde">Correlativo desde</label>
-						<input id="configCaiDesde" name="caiDesde" type="number" min="1" step="1" value="1" required>
-					</div>
-					<div class="field">
-						<label for="configCaiHasta">Correlativo hasta</label>
-						<input id="configCaiHasta" name="caiHasta" type="number" min="1" step="1" value="8000" required>
-					</div>
-					<div class="field">
-						<label for="configCaiFechaLimite">Fecha límite de emisión *</label>
-						<input id="configCaiFechaLimite" name="caiFechaLimite" type="date" required>
-					</div>
-					<div class="field">
-						<label for="configCaiActivo">Estado</label>
-						<select id="configCaiActivo" name="caiActivo">
-							<option value="true">Activo</option>
-							<option value="false">Inactivo</option>
-						</select>
-					</div>
-					<!-- Datos en el ticket (opcional, sobrescribe empresa) -->
-					<div class="field full" style="grid-column: 1 / -1;">
-						<h4 style="margin: 16px 0 8px; color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 4px;">Datos en el ticket (opcional, sobrescribe empresa)</h4>
-					</div>
-					<div class="field full">
-						<label for="configCaiNegocio">Nombre en ticket</label>
-						<input id="configCaiNegocio" name="caiNegocio" maxlength="120" placeholder="Igual al nombre de la empresa">
-					</div>
-					<div class="field full">
-						<label for="configCaiDireccion">Dirección en ticket</label>
-						<input id="configCaiDireccion" name="caiDireccion" maxlength="240" placeholder="Igual a la dirección fiscal">
-					</div>
-					<div class="field">
-						<label for="configCaiTelefono">Teléfono en ticket</label>
-						<input id="configCaiTelefono" name="caiTelefono" maxlength="30" placeholder="Igual al teléfono de la empresa">
-					</div>
-					<div class="field full">
-						<label for="configCaiPie">Pie de factura en ticket</label>
-						<input id="configCaiPie" name="caiPie" maxlength="180" placeholder="Igual al pie de factura">
-					</div>
+	<div class="pos-modal" id="clientSearchModal" hidden role="dialog" aria-modal="true" aria-labelledby="clientSearchTitle">
+		<div class="pos-modal-card">
+			<div class="pos-modal-head">
+				<h3 id="clientSearchTitle">Buscar cliente</h3>
+				<button class="modal-close" id="closeClientSearchModal" type="button" aria-label="Cerrar">×</button>
+			</div>
+			<div class="pos-modal-body">
+				<div class="pos-customer-search" style="margin-bottom: 10px;">
+					<input id="clientSearchInput" type="search" placeholder="Nombre, RTN o teléfono..." maxlength="80" autofocus>
+					<button class="button small" type="button" id="clientSearchBtn">Buscar</button>
 				</div>
-				<div class="form-actions">
-					<button class="button primary grow" type="submit" id="configSaveBtn">Guardar todo</button>
-					<button class="button" type="button" id="configUpdateBtn">Actualizar</button>
-					<button class="button" type="button" id="configResetBtn">Restaurar defectos</button>
-					<button class="button" type="button" id="configCancelBtn">Cancelar</button>
-				</div>
-			</form>
+				<div class="data-list scroll" id="clientSearchResults" aria-live="polite" style="max-height: 320px;"></div>
+				<p class="field-hint" id="clientSearchHint">Escribe para filtrar los clientes registrados.</p>
+			</div>
 		</div>
 	</div>
+
+
+	
+<!-- Modal Configuración Unificada: Empresa + CAI -->
+	
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 	<script>

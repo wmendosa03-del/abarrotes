@@ -615,23 +615,77 @@
 	}
 
 	/* ── Cliente de la venta ────────────────────────────────── */
-	function fillPosCustomers() {
+	function fillPosCustomers(term) {
 		const select = $('posCustomer');
 		if (!select) return;
 		const current = select.value;
 		const clients = Array.isArray(ws().knownClients) ? ws().knownClients : [];
+		const q = String(term || '').trim().toLowerCase();
+		const filtered = q
+			? clients.filter(client => String(client.nombre || '').toLowerCase().includes(q) || String(client.rtn || '').includes(q) || String(client.telefono || '').includes(q))
+			: clients;
 		select.replaceChildren();
 		const consumer = document.createElement('option');
 		consumer.value = '';
 		consumer.textContent = 'Consumidor Final';
 		select.appendChild(consumer);
-		clients.forEach(client => {
+		filtered.forEach(client => {
 			const option = document.createElement('option');
 			option.value = String(client.id);
-			option.textContent = client.nombre;
+			option.textContent = client.nombre + (client.rtn ? ' · ' + client.rtn : '');
 			select.appendChild(option);
 		});
-		if (current && clients.some(client => String(client.id) === current)) select.value = current;
+		if (current && filtered.some(client => String(client.id) === current)) select.value = current;
+		if (filtered.length === 1 && q) select.value = String(filtered[0].id);
+	}
+	function openClientSearchModal() {
+		const modal = $('clientSearchModal');
+		if (!modal) return;
+		const input = $('clientSearchInput');
+		if (input) { input.value = ''; input.focus(); }
+		renderClientSearchResults('');
+		modal.hidden = false;
+	}
+	function closeClientSearchModal() {
+		const modal = $('clientSearchModal');
+		if (modal) modal.hidden = true;
+	}
+	function renderClientSearchResults(term) {
+		const container = $('clientSearchResults');
+		const hint = $('clientSearchHint');
+		if (!container) return;
+		const clients = Array.isArray(ws().knownClients) ? ws().knownClients : [];
+		const q = String(term || '').trim().toLowerCase();
+		const filtered = q
+			? clients.filter(client => String(client.nombre || '').toLowerCase().includes(q) || String(client.rtn || '').includes(q) || String(client.telefono || '').includes(q))
+			: clients.slice(0, 50);
+		if (!filtered.length) {
+			container.innerHTML = '<p class="empty-note">No se encontraron clientes.</p>';
+			if (hint) hint.textContent = 'Sin resultados.';
+			return;
+		}
+		container.innerHTML = filtered.map(client => `
+			<div class="data-row client-search-row" data-client-id="${client.id}" style="cursor:pointer;">
+				<div class="row-main">
+					<strong>${esc(client.nombre)}</strong>
+					<p>${client.rtn ? 'RTN: ' + esc(client.rtn) : 'Sin RTN'}${client.telefono ? ' · ' + esc(client.telefono) : ''}</p>
+				</div>
+				<div class="row-actions">
+					<button class="button small primary" type="button" data-select-client="${client.id}">Seleccionar</button>
+				</div>
+			</div>`).join('');
+		if (hint) hint.textContent = filtered.length + ' cliente(s) encontrado(s).';
+	}
+	function selectClientFromSearch(clientId) {
+		const select = $('posCustomer');
+		if (select) select.value = String(clientId);
+		closeClientSearchModal();
+		updateCustomerTax();
+		const customer = (ws().knownClients || []).find(c => Number(c.id) === Number(clientId));
+		if (customer) notify('Cliente seleccionado: ' + customer.nombre);
+	}
+	function searchPosCustomer() {
+		openClientSearchModal();
 	}
 	function selectedCustomer() {
 		const select = $('posCustomer');
@@ -1981,6 +2035,12 @@
 			saveSettingsForm();
 		});
 		$('resetSettings')?.addEventListener('click', resetSettingsForm);
+		$('refreshSettings')?.addEventListener('click', () => {
+			state.settings = loadSettings();
+			renderSettingsView();
+			void renderCaiForm();
+			notify('Configuración actualizada.');
+		});
 	$('caiForm')?.addEventListener('submit', event => {
 		event.preventDefault();
 		void saveCaiForm();
@@ -2038,6 +2098,23 @@
 		});
 
 		$('posNewClient')?.addEventListener('click', openQuickClient);
+		$('closeClientSearchModal')?.addEventListener('click', closeClientSearchModal);
+		$('clientSearchBtn')?.addEventListener('click', () => renderClientSearchResults($('clientSearchInput')?.value || ''));
+		$('clientSearchInput')?.addEventListener('input', event => renderClientSearchResults(event.target.value));
+		$('clientSearchInput')?.addEventListener('keydown', event => {
+			if (event.key === 'Enter') { event.preventDefault(); renderClientSearchResults($('clientSearchInput')?.value || ''); }
+		});
+		$('clientSearchResults')?.addEventListener('click', event => {
+			const btn = event.target.closest('[data-select-client]');
+			if (btn) selectClientFromSearch(btn.dataset.selectClient);
+		});
+		$('posCustomerSearchBtn')?.addEventListener('click', searchPosCustomer);
+		$('posCustomerSearch')?.addEventListener('keydown', event => {
+			if (event.key === 'Enter') { event.preventDefault(); searchPosCustomer(); }
+		});
+		$('posCustomerSearch')?.addEventListener('input', event => {
+			fillPosCustomers(event.target.value);
+		});
 		$('closeQuickClientModal')?.addEventListener('click', closeQuickClient);
 		$('cancelQuickClient')?.addEventListener('click', closeQuickClient);
 		$('quickClientForm')?.addEventListener('submit', event => {
@@ -2154,7 +2231,7 @@
 			if (action === 'refresh-dashboard') { void refreshDashboard(); return; }
 			if (action === 'go-pos') { setView('pos'); $('posSearch')?.focus(); return; }
 			if (action === 'go-reports') { setView('reports'); return; }
-			if (action === 'go-settings') { setView('settings'); return; }
+			if (action === 'go-settings') { window.WSApp.openConfigForm?.(); return; }
 			if (action === 'refresh-inventory') { void refreshInventory(); return; }
 			if (action === 'inventory-low') {
 				setView('products');
@@ -2265,7 +2342,7 @@
 			if (action === 'go-products') { setView('products'); return; }
 			if (action === 'go-sales') { setView('sales'); return; }
 			if (action === 'go-reports') { setView('reports'); return; }
-			if (action === 'go-settings') { setView('settings'); return; }
+			if (action === 'go-settings') { window.WSApp.openConfigForm?.(); return; }
 			if (action === 'go-pos') { setView('pos'); return; }
 			if (action === 'new-client') { openQuickClient(); return; }
 		});
@@ -2936,7 +3013,6 @@
 			caiDesde: cai?.correlativo_desde || 1,
 			caiHasta: cai?.correlativo_hasta || 500,
 			caiFechaLimite: cai?.fecha_limite || '',
-			caiActivo: cai?.activo ? 'true' : 'false',
 			caiNegocio: cai?.negocio || 'WS Abarrotes',
 			caiDireccion: cai?.direccion || '',
 			caiTelefono: cai?.telefono || '',
@@ -3018,7 +3094,7 @@
 			p_direccion: String($('caiDireccion').value || '').trim(),
 			p_telefono: String($('caiTelefono').value || '').trim(),
 			p_pie_factura: String($('caiPie').value || '¡Gracias por su compra!').trim(),
-			p_activo: $('caiActivo').value === 'true'
+			p_activo: true
 		};
 		const editingId = $('caiId')?.value ? Number($('caiId').value) : null;
 		if (editingId) args.p_id = editingId;
@@ -3837,26 +3913,22 @@
 /* ── Formulario de Configuración Unificado: Empresa + CAI ─────────────────── */
 class ConfigForm {
     constructor() {
-        this.modal = $('configModal');
+        this.modal = null;
         this.form = $('configForm');
         this.init();
     }
     init() {
-        if (!this.modal || !this.form) return;
+        if (!this.form) return;
         this.form.addEventListener('submit', e => this.handleSave(e));
         const updateBtn = $('configUpdateBtn');
         if (updateBtn) updateBtn.addEventListener('click', () => this.loadConfig());
         const resetBtn = $('configResetBtn');
         if (resetBtn) resetBtn.addEventListener('click', () => this.resetDefaults());
         const cancelBtn = $('configCancelBtn');
-        if (cancelBtn) cancelBtn.addEventListener('click', () => this.close());
-        const closeBtn = this.modal.querySelector('.modal-close');
-        if (closeBtn) closeBtn.addEventListener('click', () => this.close());
+        if (cancelBtn) cancelBtn.addEventListener('click', () => { /* no-op */ });
     }
     open() {
         this.loadConfig();
-        this.modal.hidden = false;
-        this.form.querySelector('input, select')?.focus();
     }
     async loadConfig() {
         // 1. Cargar settings de localStorage (empresa, facturación)
@@ -3887,7 +3959,6 @@ class ConfigForm {
                     caiDesde: cai.correlativo_inicio || 1,
                     caiHasta: cai.correlativo_fin || 8000,
                     caiFechaLimite: cai.fecha_limite ? cai.fecha_limite.split('T')[0] : '',
-                    caiActivo: String(cai.activo),
                     caiNegocio: cai.nombre_negocio || '',
                     caiDireccion: cai.direccion || '',
                     caiTelefono: cai.telefono || '',
@@ -3935,7 +4006,7 @@ class ConfigForm {
         try {
             // 1. Separar datos de empresa/facturación (localStorage) y CAI (Supabase)
             const settingsKeys = ['negocio', 'rtn', 'telefono', 'direccion', 'correo', 'pie', 'isv', 'stockMinimo', 'moneda'];
-            const caiKeys = ['cai', 'caiRtn', 'caiTipo', 'caiEstablecimiento', 'caiPunto', 'caiDesde', 'caiHasta', 'caiFechaLimite', 'caiActivo', 'caiNegocio', 'caiDireccion', 'caiTelefono', 'caiPie'];
+            const caiKeys = ['cai', 'caiRtn', 'caiTipo', 'caiEstablecimiento', 'caiPunto', 'caiDesde', 'caiHasta', 'caiFechaLimite', 'caiNegocio', 'caiDireccion', 'caiTelefono', 'caiPie'];
 
             const settingsData = {};
             settingsKeys.forEach(k => { if (data[k] !== undefined) settingsData[k] = data[k]; });
@@ -3972,7 +4043,7 @@ class ConfigForm {
             p_correlativo_inicio: Number(caiData.caiDesde) || 1,
             p_correlativo_fin: Number(caiData.caiHasta) || 8000,
             p_fecha_limite: caiData.caiFechaLimite ? new Date(caiData.caiFechaLimite + 'T00:00:00').toISOString() : null,
-            p_activo: caiData.caiActivo === 'true',
+            p_activo: true,
             p_nombre_negocio: caiData.caiNegocio || '',
             p_direccion: caiData.caiDireccion || '',
             p_telefono: caiData.caiTelefono || '',
@@ -4039,7 +4110,7 @@ function init() {
 		if (!$('inventoryView').hidden) void renderInventoryView();
 		if (!$('customersView').hidden) void renderCustomersView();
 		if (!$('reportsView').hidden) void renderReportsView();
-		if (!$('settingsView').hidden) renderSettingsView();
+		if (!$('settingsView').hidden) { renderSettingsView(); void configForm?.loadConfig(); }
 	}
 	if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once: true });
 	else init();
